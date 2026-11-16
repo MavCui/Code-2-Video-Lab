@@ -17,6 +17,8 @@ touch "$TMP/.nojekyll"
 
 cd "$TMP"
 git init -q
+git config user.name "MavCui"
+git config user.email "saitannrinn@gmail.com"
 git add -A
 git commit -q -m "deploy: $(date '+%Y-%m-%d %H:%M')"
 

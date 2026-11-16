@@ -1,0 +1,104 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('reports');
+  return all
+    .filter((r) => r.data.status === 'published')
+    .map((r) => ({ params: { slug: r.data.slug }, props: { entry: r } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+---
+
+<Base title={d.title} description={d.one_liner}>
+  <main class="wrap detail">
+    <a class="back" id="back-link" href="/">← 返回项目展厅</a>
+
+    <section class="detail-head">
+      <div class="case-num">研究报告 {d.num} · 交互式 · 核验基准日 {d.updated_at}</div>
+      <h1>{d.title}</h1>
+      {d.subtitle && <p class="sub">{d.subtitle}</p>}
+      <p class="one">{d.one_liner}</p>
+      <div class="tag-rows">
+        <div class="tag-row">
+          <span class="label">类型</span>
+          <span class="card-tags"><span class="tag accent">选型决策报告</span></span>
+        </div>
+        <div class="tag-row">
+          <span class="label">包含</span>
+          <span class="card-tags">{(d.sections ?? []).map((s) => <span class="tag">{s}</span>)}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>这份报告回答什么</h2>
+      <p>{d.summary}</p>
+    </section>
+
+    <section class="section">
+      <h2>关键结论</h2>
+      <div class="scroll">
+        <table class="registry">
+          <tbody>
+            {(d.key_points ?? []).map((p) => (
+              <tr><th>{p.k}</th><td>{p.v}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section report-embed">
+      <div class="report-bar">
+        <div>
+          <strong>完整报告</strong>
+          <span class="report-hint">含交互式 TCO 测算，可直接拖动参数看盈亏平衡点</span>
+        </div>
+        <a class="embed-btn" href={d.file} target="_blank" rel="noopener noreferrer">全屏阅读 ↗</a>
+      </div>
+      <iframe class="report-frame" src={d.file} title={d.title} loading="lazy" referrerpolicy="no-referrer"></iframe>
+    </section>
+
+    <section class="section">
+      <h2>目录</h2>
+      <ol class="report-toc">{(d.sections ?? []).map((s) => <li>{s}</li>)}</ol>
+    </section>
+
+    <section class="section">
+      <h2>计算口径</h2>
+      <p>{d.basis}</p>
+      <p style="font-size:13px;color:var(--muted)">{d.verification_note}</p>
+    </section>
+
+    <section class="section">
+      <h2>使用边界</h2>
+      <ul>
+        <li>报告中的价格来自各厂商公开定价，可能随版本调整；引用前请按报告内标注的核验基准日复核。</li>
+        <li>可用率、重抽率等指标是报告汇总的实测与访谈结果，不是厂商承诺值。</li>
+        <li>交互式测算的结论取决于输入参数，换一套参数可能得出不同答案，请按自己的场景复算。</li>
+      </ul>
+    </section>
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+})();
+</script>

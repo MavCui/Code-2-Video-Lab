@@ -7,7 +7,7 @@ interface Props {
   tags: string[];
   cover: string;
   alt: string;
-  kind: 'project' | 'case' | 'work' | 'study' | 'practice' | 'report';
+  kind: 'project' | 'case' | 'work' | 'study' | 'practice';
   industry: string;
   tech: string[];
   motion?: string | null;
@@ -15,7 +15,7 @@ interface Props {
 }
 const { href, title, subtitle, oneLiner, tags, cover, alt, kind, industry, tech, motion, fit } = Astro.props;
 const searchText = [title, subtitle ?? '', oneLiner, industry, ...tech, ...tags].join(' ').toLowerCase();
-const KIND_LABEL = { case: '案例', work: '作品', study: '精读', practice: '落地', report: '报告' } as Record<string, string>;
+const KIND_LABEL = { case: '案例', work: '作品', study: '精读', practice: '落地' } as Record<string, string>;
 ---
 <a
   class="card entry-card"

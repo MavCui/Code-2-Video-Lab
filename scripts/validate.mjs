@@ -325,31 +325,12 @@ for (const p of practicePublished) {
   }
 }
 
-/* ---------- 研究报告 ---------- */
-const reportContentDir = path.join(root, 'src/content/reports');
-const reportFiles = fs.existsSync(reportContentDir) ? fs.readdirSync(reportContentDir).filter((f) => f.endsWith('.md')).sort() : [];
-const reports = reportFiles.map((file) => ({ file, data: matter(fs.readFileSync(path.join(reportContentDir, file), 'utf8')).data }));
-const reportsPublished = reports.filter((r) => r.data.status === 'published');
-
-for (const r of reportsPublished) {
-  const d = r.data;
-  for (const k of ['num', 'slug', 'title', 'one_liner', 'industry', 'summary', 'file', 'basis', 'updated_at', 'verification_note']) {
-    if (!has(d[k])) err(r.file, `报告缺少内部字段 ${k}`);
-  }
-  if (has(d.industry) && !categoryLabels.includes(d.industry)) err(r.file, `行业「${d.industry}」不在行业词表内`);
-  if (String(d.summary ?? '').replace(/\s/g, '').length < 40) err(r.file, '报告摘要过短（少于 40 字）');
-  if ((d.sections ?? []).length < 3) err(r.file, '报告目录至少需要 3 节');
-  if ((d.key_points ?? []).length < 3) err(r.file, '关键结论至少需要 3 条');
-  if (has(d.cover?.file)) {
-    const fp = abs(d.cover.file);
-    if (!fs.existsSync(fp)) err(r.file, `报告封面不存在：${d.cover.file}`);
-    else assetCount++;
-  }
-  if (has(d.file)) {
-    const rp = abs(d.file);
-    if (!fs.existsSync(rp)) err(r.file, `报告文件不存在：${d.file}`);
-    else if (!d.file.endsWith('.html')) err(r.file, '报告文件必须是 .html');
-  }
+/* ---------- 独立选型报告 ---------- */
+const decisionReportPath = path.join(publicDir, 'decision-report/index.html');
+if (!fs.existsSync(decisionReportPath) || fs.statSync(decisionReportPath).size === 0) {
+  err('decision-report/index.html', '独立选型报告 HTML 缺失或为空');
+} else {
+  assetCount++;
 }
 
 const uniqueTargets = [...new Map(linkTargets.map((x) => [x.url, x])).values()];
@@ -434,7 +415,6 @@ const summary = [
   `- 创作案例：${works.length}（published ${worksPublished.length}）`,
   `- 案例精读：${studies.length}（published ${studiesPublished.length}）`,
   `- 落地案例：${practices.length}（published ${practicePublished.length}）`,
-  `- 研究报告：${reports.length}（published ${reportsPublished.length}）`,
   `- 动态预览：${motionCount} 段（5 秒静音循环，逐条登记来源）`,
   `- 资产检查：${assetCount} 项通过`,
   `- 阻断级错误：${errors.length}`,
@@ -453,5 +433,5 @@ if (errors.length) {
 if (reviews.length) console.log(`[人工复核] 确认异常 ${reviews.length} 个、待人工确认 ${undetermined.length} 个，已写入 reports/外链人工复核.md（不阻断发布）`);
 else if (undetermined.length) console.log(`[人工复核] 待人工确认 ${undetermined.length} 个（本环境不可判定），已写入 reports/外链人工复核.md（不阻断发布）`);
 console.log(
-  `[校验] published ${published.length} 项目 + ${casesPublished.length} 案例 + ${worksPublished.length} 创作案例 + ${studiesPublished.length} 精读 + ${practicePublished.length} 落地 + ${reportsPublished.length} 报告 / 动态预览 ${motionCount} / draft ${drafts.length} / 资产 ${assetCount} / 阻断 ${errors.length} / 复核 ${reviews.length} / 待确认 ${undetermined.length}`
+  `[校验] published ${published.length} 项目 + ${casesPublished.length} 案例 + ${worksPublished.length} 创作案例 + ${studiesPublished.length} 精读 + ${practicePublished.length} 落地 / 动态预览 ${motionCount} / draft ${drafts.length} / 资产 ${assetCount} / 阻断 ${errors.length} / 复核 ${reviews.length} / 待确认 ${undetermined.length}`
 );

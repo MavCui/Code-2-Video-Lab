@@ -19,17 +19,16 @@ const casePages = countPages(path.join('dist', 'cases'));
 const workPages = countPages(path.join('dist', 'works'));
 const studyPages = countPages(path.join('dist', 'studies'));
 const practicePages = countPages(path.join('dist', 'practice'));
-const reportPages = countPages(path.join('dist', 'reports'));
-const detailCount = projectPages + casePages + workPages + studyPages + practicePages + reportPages;
+const detailCount = projectPages + casePages + workPages + studyPages + practicePages;
 const productComplete = hasIndex && projectPages > 0;
 
 if (build.status === 0) {
-  console.log(`[构建] 完成，生成 ${projectPages} 个项目页 + ${casePages} 个案例页 + ${workPages} 个创作案例页 + ${studyPages} 个精读页 + ${practicePages} 个落地案例页 + ${reportPages} 份研究报告页。`);
+  console.log(`[构建] 完成，生成 ${projectPages} 个项目页 + ${casePages} 个案例页 + ${workPages} 个创作案例页 + ${studyPages} 个精读页 + ${practicePages} 个落地案例页。`);
   process.exit(0);
 }
 if (productComplete && /safe-delete|broker denied delete/i.test(output)) {
   console.log('[构建] 页面产物完整；宿主环境的删除保护阻止了 Astro 清理构建期空目录，已忽略该清理步骤。');
-  console.log(`[构建] 完成，生成 ${projectPages} 个项目页 + ${casePages} 个案例页 + ${workPages} 个创作案例页 + ${studyPages} 个精读页 + ${practicePages} 个落地案例页 + ${reportPages} 份研究报告页。`);
+  console.log(`[构建] 完成，生成 ${projectPages} 个项目页 + ${casePages} 个案例页 + ${workPages} 个创作案例页 + ${studyPages} 个精读页 + ${practicePages} 个落地案例页。`);
   process.exit(0);
 }
 console.error('[构建] 失败，页面产物不完整。');

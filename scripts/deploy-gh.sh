@@ -5,13 +5,12 @@ set -e
 
 REPO="MavCui/Code-2-Video-Lab"
 BASE="/Code-2-Video-Lab"
-TMP=".deploy-gh"
 
 BASE_PATH="$BASE" npm run build
 BASE_PATH="$BASE" node scripts/prefix-base.mjs
 
-rm -rf "$TMP"
-mkdir -p "$TMP"
+# 在系统临时目录组装产物，避免在仓库内创建/删除大量文件
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/c2v-gh.XXXXXX")
 cp -R dist/. "$TMP"/
 touch "$TMP/.nojekyll"
 
@@ -30,6 +29,4 @@ else
   git push -q -f "https://github.com/${REPO}.git" HEAD:gh-pages
 fi
 
-cd ..
-rm -rf "$TMP"
-echo "[deploy] 已发布到 https://mavcui.github.io/Code-2-Video-Lab/"
+echo "[deploy] 已发布到 https://mavcui.github.io${BASE}/"

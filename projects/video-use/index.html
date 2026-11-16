@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="把原始素材交给编码 Agent，用转写生成 EDL、交给 FFmpeg 剪辑，并在每个切点做自检。"><title>video-use · Code-2-Video-Lab</title><link rel="stylesheet" href="/Code-2-Video-Lab/_astro/about.BrEaaRpf.css"></head> <body> <header class="site-header"> <div class="wrap"> <a class="brand" href="/Code-2-Video-Lab/"><span class="mark">Code-2-Video-Lab</span><span class="sub">代码生成视频项目展示台</span></a> <span class="header-meta"><a href="/Code-2-Video-Lab/decision-report/" target="_blank" rel="noopener noreferrer">选型报告</a><span class="dot">·</span><a href="/Code-2-Video-Lab/about/">关于</a><span class="dot">·</span><a href="https://github.com/MavCui/Code-2-Video-Lab" target="_blank" rel="noopener noreferrer">GitHub</a></span> </div> </header>  <main class="wrap detail"> <a class="back" id="back-link" href="/Code-2-Video-Lab/">← 返回项目展厅</a> <section class="detail-head"> <h1>video-use</h1> <p class="sub">转写驱动的实拍剪辑</p> <p class="one">把原始素材交给编码 Agent，用转写生成 EDL、交给 FFmpeg 剪辑，并在每个切点做自检。</p> <div class="tag-rows"> <div class="tag-row"> <span class="label">应用场景</span> <span class="card-tags"><span class="tag">媒体与出版</span><span class="tag">品牌与营销</span></span> </div><div class="tag-row"> <span class="label">技术路线</span> <span class="card-tags"><span class="tag">FFmpeg</span></span> </div><div class="tag-row"> <span class="label">项目类型</span> <span class="card-tags"><span class="tag">工作流</span></span> </div><div class="tag-row"> <span class="label">内容状态</span> <span class="card-tags"><span class="tag">官方文档截图</span></span> </div> </div> </section> <section class="media-main"> <img class="detail-media-img" src="/Code-2-Video-Lab/media/video-use/banner.jpg" alt="video-use 官方横幅：终端与剪辑工作流示意"> <div class="media-caption"> <strong>video-use 官方横幅</strong>
+· 官方文档截图（静帧） · video-use 官方 README 横幅 （非本站复现，未标注为实测效果） </div> </section>  <nav class="outlinks" aria-label="外部来源"> <a class="outlink primary" href="https://video-use.com" target="_blank" rel="noopener noreferrer">项目官网 ↗</a><a class="outlink" href="https://github.com/browser-use/video-use" target="_blank" rel="noopener noreferrer">GitHub ↗</a> </nav> <section class="section"> <h2>项目概览</h2> <p>把原始素材放进一个文件夹，和编码 Agent 对话就能拿回成片。它先清点素材、提出剪辑策略并等待确认，再用转写结果驱动剪辑：去掉口头禅与废段、按策略调色、烧录字幕、在每个切点做 30ms 音频淡入淡出，最后对渲染结果的切点自检。适合口播、访谈、教程、旅行与蒙太奇，走的是「代码编排剪辑」而非「代码定义画面」的路线。</p> </section> <section class="section"> <h2>方法与分析</h2> <div class="prose"><blockquote>
+<p>以下是本站基于官方 README 与项目页整理的分析与判断，不代表作者原始结论。本站未运行代码、未复现样片。</p>
+</blockquote>
+<h3 id="怎么工作">怎么工作</h3>
+<p>输入是素材文件夹，Agent 清点后提出策略并等待确认；转写得到文字与时间信息，进而生成 EDL 与 FFmpeg 命令，执行去填充词、留白切除、调色、字幕与切点音频处理，产物落在 edit/final.mp4。官方还强调渲染后会在每个切点自检再交付。</p>
+<h3 id="特点在哪里">特点在哪里</h3>
+<p>它不重新绘制画面，而是让代码决定剪辑与包装，素材仍是真实拍摄。用文字转写驱动比把整段视频逐帧灌给模型更省，也更容易解释「为什么在这里切」。这与代码渲染路线是互补关系，不应混为一谈。</p>
+<h3 id="适合做什么">适合做什么</h3>
+<p>口播、访谈、播客、教程、旅行与蒙太奇等以已有素材为主的场景；需要证明产品可用性的真实操作演示也合适。若要精确控制符号、公式或几何，代码渲染框架更合适。</p>
+<h3 id="值得借鉴什么">值得借鉴什么</h3>
+<p>切点自检、音频边界淡入淡出、策略先确认再执行，都是低成本高收益的工程约束。也要记住两条边界：ASR 转写不是稿子真值；剪出来的语句不得改变原意，叠字不要遮住人脸。</p></div> </section> <section class="section"> <h2>限制与注意事项</h2> <ul><li>官方横幅是工作流示意界面，不是成片画面。</li><li>本站仅核对官方 README，未运行代码、未复现样片。</li><li>默认接入 ElevenLabs 等付费服务，开源不等于全流程免费。</li><li>转写不是稿子真值，剪辑不得改变受访者原意，需人工审片。</li><li>真实素材的再发布授权与人物同意需单独确认。</li></ul> </section> <section class="section"> <h2>媒体与许可登记</h2> <p style="font-size:13px;color:var(--muted)">代码许可与预览媒体使用依据分开登记；后者不由前者推导。</p> <div class="scroll"> <table class="registry"> <thead><tr class="group"><th colspan="2">代码许可（仅覆盖仓库代码）</th></tr></thead> <tbody> <tr><th>SPDX</th><td>MIT</td></tr> <tr><th>许可 / 说明来源</th><td><a href="https://github.com/browser-use/video-use/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/browser-use/video-use/blob/main/LICENSE</a></td></tr> <tr><th>覆盖说明</th><td>仅覆盖仓库代码；不覆盖官方预览图、样片、生成媒体与第三方服务，也不自动决定视频或截图能否被本站使用。默认接入 ElevenLabs 等外部服务，开源工具不等于全流程免费；生成字幕与调色链需自行核依赖。</td></tr> </tbody> <thead><tr class="group"><th colspan="2">预览媒体使用依据（逐条单独登记）</th></tr></thead> <tbody>  <tr><th>素材</th><td><strong>video-use 官方横幅</strong> · 官方文档截图（静帧） · <a href="/Code-2-Video-Lab/media/video-use/banner.jpg" target="_blank" rel="noopener noreferrer">/media/video-use/banner.jpg</a></td></tr> <tr><th>权利方 / 署名</th><td>browser-use 团队 · video-use 官方 README 横幅</td></tr> <tr><th>使用依据</th><td>官方公开README 横幅中用于展示项目效果的素材；本站以介绍性引用方式使用，已署名并保留来源回链；使用依据单独登记，不由仓库代码许可推导</td></tr> <tr><th>来源</th><td><a href="https://raw.githubusercontent.com/browser-use/video-use/main/static/video-use-banner.png" target="_blank" rel="noopener noreferrer">https://raw.githubusercontent.com/browser-use/video-use/main/static/video-use-banner.png</a> · <a href="https://github.com/browser-use/video-use" target="_blank" rel="noopener noreferrer">来源页面</a></td></tr> <tr><th>备注</th><td>本地仅存展示用副本；公开托管或商用分发前需向权利方单独确认</td></tr>  </tbody> </table> </div> </section> <section class="section"> <h2>来源与更新时间</h2> <div class="facts"> <div class="fact"><span class="k">作者 / 团队</span><span class="v">browser-use 团队</span></div>  <div class="fact"><span class="k">本站更新日期</span><span class="v">2026-11-09</span></div> <div class="fact"><span class="k">来源核验说明</span><span class="v">已核对官方 README / 项目页与许可文件，未运行代码、未复现样片</span></div> <div class="fact"><span class="k">原始来源</span><span class="v">官方 README / 项目页（2026-11-09 读取）；核验条目底表「video-use」条目</span></div> <div class="fact"><span class="k">收录理由</span><span class="v">代表性上补齐了「混合剪辑 / 实拍编辑」这条容易被忽略的路线；预览质量上有官方工作流示意与切点说明；来源完整度上官网、仓库与 MIT 许可可核。主分类按展示台策展维度归入产品演示（真实操作与教程演示）。</span></div> </div> </section> <section class="section"> <h2>相关项目</h2> <div class="related"><a href="/Code-2-Video-Lab/projects/video-shotcraft/">video-shotcraft ↗</a><a href="/Code-2-Video-Lab/projects/guizang-product-video-skill/">归藏 product video skill ↗</a><a href="/Code-2-Video-Lab/projects/video-talkcraft/">video-talkcraft ↗</a></div> </section> </main>  <footer class="site-footer"> <div class="wrap">本站为项目整理与展示，分析为本站判断；样片与截图权利归原作者，来源见各项目详情页。<span class="foot-links"><a href="/Code-2-Video-Lab/decision-report/" target="_blank" rel="noopener noreferrer">选型报告</a> · <a href="/Code-2-Video-Lab/about/">关于</a> · <a href="https://github.com/MavCui/Code-2-Video-Lab" target="_blank" rel="noopener noreferrer">GitHub</a></span></div> </footer> </body></html> <script>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/Code-2-Video-Lab/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+  document.querySelectorAll('.detail-media-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      var cap = document.createElement('div');
+      cap.className = 'media-caption';
+      cap.textContent = '预览加载失败，请通过上方外部来源按钮访问原始页面。';
+      img.replaceWith(cap);
+    });
+  });
+})();
+</script>

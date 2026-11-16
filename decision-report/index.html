@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-sp-mode="scroll">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code2Video 与纯视频模型深度调研与选型决策报告</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.2.8/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.2.8/chinese-simplified-700.css">
+<style>
+:root {
+  --accent: #0075de;
+  --accent2: #0f766e;
+  --accent3: #d97706;
+  --accent-hover: #005eb5;
+  --accent-soft: rgba(0, 117, 222, 0.08);
+  --bg: #ffffff;
+  --bg-elevated: #f6f5f4;
+  --panel: #ffffff;
+  --text: rgba(0, 0, 0, 0.92);
+  --text-secondary: rgba(0, 0, 0, 0.68);
+  --muted: rgba(0, 0, 0, 0.50);
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --warn: #b45309;
+  --warn-bg: #fff8ec;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --success: #0f766e;
+  --success-bg: #f0fdfa;
+  --shadow-card: rgba(0, 0, 0, 0.04) 0px 4px 18px, rgba(0, 0, 0, 0.025) 0px 2px 8px, rgba(0, 0, 0, 0.015) 0px 0.8px 3px;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+}
+
+.num-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+img { max-width: 100%; height: auto; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  color: #0b4f96;
+}
+
+/* Top Nav */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.top-nav-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.nav-brand {
+  font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text);
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+  margin-right: 4px;
+}
+.top-nav a {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+.top-nav a:hover, .top-nav a:active {
+  background: var(--bg-elevated);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Container */
+.wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* Hero + Highlighted Overall Verdict Zone */
+.doc-hero {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-top {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 36px;
+  align-items: end;
+  margin-bottom: 32px;
+}
+.eyebrow {
+  font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.doc-hero h1 {
+  font-family: "Noto Serif SC", "Plus Jakarta Sans", -apple-system, serif;
+  font-weight: 700;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  margin: 0 0 14px;
+  color: var(--text);
+}
+.hero-lead {
+  font-size: 15.5px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 60ch;
+}
+.hero-thesis-card {
+  background: #f5f9ff;
+  border: 1px solid rgba(0, 117, 222, 0.25);
+  border-left: 5px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-card);
+}
+.thesis-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.thesis-main {
+  font-family: "Noto Serif SC", serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0;
+}
+
+/* 3-Route Highlight Matrix (Layout-first decision summary) */
+.verdict-trio {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.18fr;
+  gap: 16px;
+}
+.vt-card {
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vt-card.vt-video { border-top: 4px solid #d97706; background: #fffdf8; }
+.vt-card.vt-c2v { border-top: 4px solid #0075de; background: #fafcff; }
+.vt-card.vt-hybrid {
+  border-top: 4px solid #0f766e;
+  border-color: rgba(15, 118, 110, 0.28);
+  background: #f3fbf9;
+}
+.vt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.vt-title { font-size: 16.5px; font-weight: 700; color: var(--text); }
+.vt-trigger {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.55;
+}
+.vt-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.vt-stat {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.vt-stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+.vt-stat-val { font-size: 16px; font-weight: 700; color: var(--text); }
+.vt-stack {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-top: auto;
+}
+
+/* DataHighlight Bento Strip */
+.data-strip {
+  margin: 36px 0 48px;
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1.2fr;
+  gap: 16px;
+}
+.metric-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.2s;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+.metric-card.highlight {
+  background: #f5f9ff;
+  border-color: rgba(0, 117, 222, 0.24);
+}
+.metric-val {
+  font-family: "Plus Jakarta Sans", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(24px, 2.5vw, 31px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.metric-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.metric-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Section Rhythm */
+.report-section {
+  padding-top: 52px;
+  border-top: 1px solid var(--border);
+  margin-top: 44px;
+}
+.section-head { margin-bottom: 24px; }
+.section-no {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.section-head h2 {
+  font-family: "Noto Serif SC", "Plus Jakarta Sans", serif;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.section-lead {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 72ch;
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-size: 15.5px;
+  font-weight: 700;
+  margin: 22px 0 10px;
+  color: var(--text);
+}
+
+/* QuoteBlock */
+.quote-block {
+  border-left: 3px solid var(--accent);
+  background: var(--bg-elevated);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 18px 22px;
+  margin: 20px 0;
+}
+.quote-block p {
+  font-family: "Noto Serif SC", serif;
+  font-size: 15.5px;
+  line-height: 1.68;
+  margin: 0;
+  color: var(--text);
+}
+
+/* Grids (2-column alternating, never 3 equal cards in a row for regular content) */
+.split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+.asym-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+.doc-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}
+.doc-card h4 { margin-top: 0; }
+.doc-card.warn-card {
+  background: var(--warn-bg);
+  border-color: rgba(180, 83, 9, 0.22);
+}
+.doc-card.accent-card {
+  background: #f5f9ff;
+  border-color: rgba(0, 117, 222, 0.25);
+}
+
+/* Tables (Clean spatial columns, no cramped sub-notes) */
+.table-wrap {
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 12.5px;
+  text-align: left;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--text);
+}
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #fafcff; }
+.cell-main { font-weight: 700; color: var(--text); display: block; margin-bottom: 4px; }
+.cell-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); }
+.cell-row:last-child { border-bottom: 0; }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.tag.blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.tag.teal { background: #f0fdfa; color: #0f766e; border-color: #99f6e4; }
+.tag.amber { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.tag.red { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+/* Panels */
+.visual-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: var(--shadow-card);
+}
+.visual-panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mermaid { text-align: center; overflow-x: auto; }
+.mermaid svg { max-width: 100%; height: auto; }
+.mermaid-loading { color: var(--muted); font-size: 13.5px; }
+
+/* Interactive TCO Workbench */
+.preset-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.preset-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+.preset-btn {
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.15s ease;
+}
+.preset-btn:hover { background: var(--bg-elevated); border-color: var(--accent); color: var(--accent); }
+.preset-btn:active { transform: scale(0.97); }
+.preset-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.calc-controls {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.ctrl-row { margin-bottom: 15px; }
+.ctrl-row:last-child { margin-bottom: 0; }
+.ctrl-row label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.ctrl-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  min-height: 28px;
+  cursor: pointer;
+}
+.ctrl-row select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  min-height: 44px;
+}
+
+.tco-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tco-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tco-bar-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  background: #fff;
+  transition: border-color 0.2s, background 0.2s;
+}
+.tco-bar-item.winner {
+  border-color: var(--accent);
+  background: #f5f9ff;
+}
+.tco-bar-item.blocked {
+  border-color: rgba(180, 83, 9, 0.35);
+  background: #fffcf5;
+}
+.tco-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tco-bar-name { font-weight: 700; font-size: 14.5px; color: var(--text); }
+.tco-bar-price {
+  font-family: "Plus Jakarta Sans", ui-monospace, monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stacked-track {
+  height: 12px;
+  background: var(--bg-elevated);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 10px;
+}
+.seg { height: 100%; transition: width 0.25s ease; }
+
+/* Structured breakdown pills instead of small inline notes */
+.tco-split-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tco-split-cell {
+  background: rgba(246, 245, 244, 0.7);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tco-split-cell span:first-child { color: var(--text-secondary); }
+.tco-split-cell span:last-child { font-weight: 700; color: var(--text); }
+.tco-warn-banner {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Interactive Chart Box */
+.chart-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  background: #fff;
+}
+.chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.chart-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.chart-tabs { display: flex; gap: 6px; }
+.chart-tab {
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 38px;
+}
+.chart-tab.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.chart-svg-wrap { width: 100%; overflow-x: auto; }
+.chart-svg-wrap svg { width: 100%; min-width: 480px; height: auto; display: block; }
+
+.pareto-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* TimelineList */
+.timeline {
+  border-left: 2px solid var(--accent);
+  margin: 20px 0 0 8px;
+  padding-left: 22px;
+}
+.tl-item { position: relative; margin-bottom: 18px; }
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: -29px;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.tl-item strong { display: block; font-size: 15px; color: var(--text); margin-bottom: 3px; }
+.tl-item span { font-size: 14px; color: var(--text-secondary); }
+
+/* AccordionSection */
+details.acc-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+details.acc-item summary {
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+details.acc-item summary:hover { background: var(--bg-elevated); }
+details.acc-item .acc-body {
+  padding: 14px 18px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
+
+/* Footer */
+.doc-footer {
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 960px) {
+  .hero-top { grid-template-columns: 1fr; gap: 20px; }
+  .verdict-trio { grid-template-columns: 1fr; }
+  .data-strip { grid-template-columns: 1fr 1fr; }
+  .calc-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px 64px; }
+  .data-strip { grid-template-columns: 1fr; }
+  .split-grid, .asym-grid { grid-template-columns: 1fr; }
+  .tco-split-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <span class="nav-brand">C2V vs 纯视频模型选型报告</span>
+    <a href="#verdict">总体结论高亮</a>
+    <a href="#tco">交互式 TCO 曲线</a>
+    <a href="#paradigm">技术栈与四代引擎</a>
+    <a href="#cost">双路线价格与基准</a>
+    <a href="#decision">7 类场景选型</a>
+    <a href="#playbook">工程降本法则</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="doc-hero" id="verdict">
+  <div class="hero-top">
+    <div>
+      <div class="eyebrow">Independent Research · 核验基准日 2026-11-16</div>
+      <h1>Code2Video 与纯视频模型<br>选型决策与成本对比报告</h1>
+      <p class="hero-lead">剔除营销噪音与模糊口号，从底层计费量纲、真实重抽税、LLM 推理损耗与多版本复用曲线出发，明确回答不同业务场景下到底该选哪条技术路线。</p>
+    </div>
+    <div class="hero-thesis-card">
+      <div class="thesis-kicker">核心总纲（TL;DR）</div>
+      <p class="thesis-main">Code2Video 与纯视频模型不是替代关系，而是“结构确定层”与“像素质感层”的分工。决定胜负的不是首版单价，而是“修改轮次 × 变体复用 × 屏幕精度要求”。</p>
+    </div>
+  </div>
+
+  <!-- 高亮总体结论三路线卡片：用布局与数据块直接传达选型结论，替代密集小字注释 -->
+  <div class="verdict-trio" aria-label="三条路线总体选型结论高亮">
+    <div class="vt-card vt-video">
+      <div class="vt-head">
+        <span class="vt-title">方案 A · 纯视频生成模型</span>
+        <span class="tag amber">像素质感层</span>
+      </div>
+      <div class="vt-trigger">适用边界：写实人物表演 / 自然风光 / 情绪短片，且<strong>一次性交付（0–1 轮改稿、单版本）</strong></div>
+      <div class="vt-metrics">
+        <div class="vt-stat">
+          <div class="vt-stat-label">名义标价 → 商业成品秒</div>
+          <div class="vt-stat-val num-mono">$0.03–0.6 → $0.13–3.0</div>
+        </div>
+        <div class="vt-stat">
+          <div class="vt-stat-label">商业严审可用率</div>
+          <div class="vt-stat-val num-mono">38% – 58%</div>
+        </div>
+      </div>
+      <div class="vt-stack"><strong>主力组合：</strong>Omni 1.2 Flash（对话改图）/ Kling 4.0（30s）/ Seedance 2.5 / MiniMax H3。<em>Sora 2 API 已于 9/24 彻底关停。</em></div>
+    </div>
+
+    <div class="vt-card vt-c2v">
+      <div class="vt-head">
+        <span class="vt-title">方案 B · 纯 Code2Video</span>
+        <span class="tag blue">结构确定层</span>
+      </div>
+      <div class="vt-trigger">适用边界：屏幕内容 <strong>100% 精准</strong>（UI/数字/公式/图表），或<strong>改稿 ≥3 轮 / 变体 ≥2 版</strong></div>
+      <div class="vt-metrics">
+        <div class="vt-stat">
+          <div class="vt-stat-label">云端 / 本地渲染算力</div>
+          <div class="vt-stat-val num-mono">$0.017/min · $0</div>
+        </div>
+        <div class="vt-stat">
+          <div class="vt-stat-label">单任务 LLM 跨度</div>
+          <div class="vt-stat-val num-mono">$0.01 – $3.89</div>
+        </div>
+      </div>
+      <div class="vt-stack"><strong>主力组合：</strong>HyperFrames (Apache-2.0) / Remotion Lambda + GPT-6.1 Sol（$0.31/任务）/ Opus 5.5（1536 Elo）。</div>
+    </div>
+
+    <div class="vt-card vt-hybrid">
+      <div class="vt-head">
+        <span class="vt-title">方案 C · 混合双引擎</span>
+        <span class="tag teal">企业生产首选</span>
+      </div>
+      <div class="vt-trigger">适用边界：<strong>既要写实镜头（20%–60%），又要精确文字价格/多尺寸多语言矩阵</strong>（发布片/电商广告）</div>
+      <div class="vt-metrics">
+        <div class="vt-stat">
+          <div class="vt-stat-label">TCO 盈亏反超点</div>
+          <div class="vt-stat-val num-mono">第 2–3 版即反超</div>
+        </div>
+        <div class="vt-stat">
+          <div class="vt-stat-label">第 10 版成本优势</div>
+          <div class="vt-stat-val num-mono">总成本省 70%–90%</div>
+        </div>
+      </div>
+      <div class="vt-stack"><strong>主力架构：</strong>代码控制时间轴、字幕图表与 3D 物理白模预演；视频模型仅作特定写实镜头的像素供片方。</div>
+    </div>
+  </div>
+</header>
+
+<section class="data-strip reveal" aria-label="关键经济规律指标">
+  <div class="metric-card highlight">
+    <div class="metric-val">1.08× vs 5.0×</div>
+    <div class="metric-title">重抽乘数随质检门限分化</div>
+    <div class="metric-desc">轻量社交试水重抽仅 +5%–10%（但 10.9% 失败）；商业严审过稿叠加配音后达标价 1.7–5.0×。</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-val">95% 在推理</div>
+    <div class="metric-title">C2V 成本波动核心不在渲染</div>
+    <div class="metric-desc">所有模型 HTML 正文仅 4–12k tokens，但 Claude 5.5 思考输出达 152–176k tokens，拉开 10 倍账单。</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-val">2.8× / 1.6×</div>
+    <div class="metric-title">局部自修复（ScopeRefine）杠杆</div>
+    <div class="metric-desc">去掉局部修复改全量重抽，会同时让渲染时间 ×2.8、Token ×1.6；专用视频 Harness 可省 ~30% 成本。</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-val">≥4 人门槛</div>
+    <div class="metric-title">Remotion 企业授权悬崖</div>
+    <div class="metric-desc">按全公司总人数计算，≥4 人须付 $25/席或 $100+/月；HyperFrames 与 Framefields 为 Apache-2.0 免费。</div>
+  </div>
+</section>
+
+<section class="report-section reveal" id="tco">
+  <div class="section-head">
+    <div class="section-no">Section 01 · Interactive TCO Workbench</div>
+    <h2>交互式全链路 TCO 测算与盈亏平衡曲线</h2>
+    <p class="section-lead">选择下方典型业务预设或拖动参数滑块，实时对比三大方案的<strong>分项成本结构</strong>以及随<strong>改稿轮次 / 变体数量</strong>扩展的盈亏平衡交叉点。</p>
+  </div>
+
+  <div class="visual-panel">
+    <div class="preset-bar">
+      <span class="preset-label">业务场景预设：</span>
+      <button class="preset-btn" data-preset="social">1. 一次性情绪短片（1版×1轮 · 90%写实）</button>
+      <button class="preset-btn active" data-preset="saas">2. 企业产品发布+多语种（3版×3轮 · 25%写实）</button>
+      <button class="preset-btn" data-preset="ecommerce">3. 电商投放矩阵（12变体×4轮 · 40%写实）</button>
+      <button class="preset-btn" data-preset="edu">4. 硬核数据/UI科普（5版×4轮 · 0%写实）</button>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-controls">
+        <div class="ctrl-row">
+          <label><span>成片时长（1080p）</span><span id="v-dur" class="num-mono">60 秒</span></label>
+          <input id="in-dur" type="range" min="15" max="180" step="15" value="60">
+        </div>
+        <div class="ctrl-row">
+          <label><span>总交付轮次（首版 + 实质改稿）</span><span id="v-rounds" class="num-mono">3 轮</span></label>
+          <input id="in-rounds" type="range" min="1" max="8" value="3">
+        </div>
+        <div class="ctrl-row">
+          <label><span>派生版本数（多语言/多尺寸/定制）</span><span id="v-variants" class="num-mono">3 个</span></label>
+          <input id="in-variants" type="range" min="1" max="20" value="3">
+        </div>
+        <div class="ctrl-row">
+          <label><span>写实人物 / 自然外景占比</span><span id="v-photoreal" class="num-mono">25%</span></label>
+          <input id="in-photoreal" type="range" min="0" max="100" step="5" value="25">
+        </div>
+        <div class="ctrl-row">
+          <label><span>视频模型档位（含商业重抽税）</span></label>
+          <select id="in-vmodel">
+            <option value="0.16">经济档：Omni 1.2 Flash / MiniMax H3（~$0.16/成品秒）</option>
+            <option value="0.48" selected>主流档：Kling 4.0 / Wan 3.0 1080p（~$0.48/成品秒）</option>
+            <option value="1.15">旗舰档：Seedance 2.5 / Veo 3.1 Std（~$1.15/成品秒）</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <label><span>C2V 主力 Coding 模型</span></label>
+          <select id="in-cmodel">
+            <option value="1.5">性价比路由：Opus 规划 + GPT-6.1 Sol 执行（~$1.5）</option>
+            <option value="6.5" selected>均衡主力：Opus 5.5 + Sol 混用（~$6.5）</option>
+            <option value="22.0">重度长程：Fable 5.2 / 多轮视觉审帧（~$22）</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <label><span>C2V 渲染引擎与公司规模</span></label>
+          <select id="in-engine">
+            <option value="0" selected>HyperFrames / Framefields（Apache-2.0 零许可费）</option>
+            <option value="100">Remotion Automators（≥4 人企业保底 $100/月）</option>
+            <option value="0_small">Remotion 个人/≤3 人小团队（免费许可）</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <label><span>人工制作与审片折算时薪</span></label>
+          <select id="in-labor">
+            <option value="40" selected>$40/小时（含抽卡、拼接、字幕与工程调试）</option>
+            <option value="80">$80/小时（资深设计师 / 工程师全成本）</option>
+            <option value="0">$0（仅对比外部 API + 算力 + 许可支出）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tco-right">
+        <div class="tco-bars">
+          <div class="tco-bar-item" id="card-a">
+            <div class="tco-bar-head">
+              <span class="tco-bar-name">方案 A：纯视频生成模型 <span id="badge-a" class="tag"></span></span>
+              <span class="tco-bar-price" id="price-a">$0</span>
+            </div>
+            <div class="stacked-track" id="stack-a"></div>
+            <div class="tco-split-grid" id="split-a"></div>
+          </div>
+
+          <div class="tco-bar-item" id="card-b">
+            <div class="tco-bar-head">
+              <span class="tco-bar-name">方案 B：纯 Code2Video <span id="badge-b" class="tag"></span></span>
+              <span class="tco-bar-price" id="price-b">$0</span>
+            </div>
+            <div class="stacked-track" id="stack-b"></div>
+            <div class="tco-split-grid" id="split-b"></div>
+            <div class="tco-warn-banner" id="warn-b" style="display:none;">当前写实占比 ≥35%：纯代码无法达成真人表演与自然光影上限</div>
+          </div>
+
+          <div class="tco-bar-item" id="card-c">
+            <div class="tco-bar-head">
+              <span class="tco-bar-name">方案 C：混合双引擎（代码结构 + 写实供片） <span id="badge-c" class="tag"></span></span>
+              <span class="tco-bar-price" id="price-c">$0</span>
+            </div>
+            <div class="stacked-track" id="stack-c"></div>
+            <div class="tco-split-grid" id="split-c"></div>
+          </div>
+
+          <div class="legend-row">
+            <span><i class="legend-dot" style="background:#d97706;"></i>视频生成 API 与音频后期</span>
+            <span><i class="legend-dot" style="background:#0075de;"></i>LLM 推理 + 渲染 + 许可</span>
+            <span><i class="legend-dot" style="background:#94a3b8;"></i>人工制作与审片工时</span>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-head">
+            <span class="chart-title" id="curve-title">盈亏平衡动态曲线：累计 TCO 随修改轮次变化</span>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-axis="rounds">横轴：改稿轮次 (1–8 轮)</button>
+              <button class="chart-tab" data-axis="variants">横轴：变体数量 (1–20 版)</button>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="tco-curve-wrap"></div>
+        </div>
+
+        <div class="quote-block" style="margin:0;">
+          <p id="sim-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="report-section reveal" id="paradigm">
+  <div class="section-head">
+    <div class="section-no">Section 02 · Architecture &amp; Engines</div>
+    <h2>技术范式与四代 Code2Video 渲染引擎</h2>
+    <p class="section-lead">两条路线的分歧根源在于修改回环：视频生成每次改动倾向全局重抽，而代码视频只需改参数或局部切片。</p>
+  </div>
+
+  <div class="visual-panel">
+    <div class="visual-panel-title">
+      <span>图 1｜三条技术路线的生产管线与修改成本回环</span>
+      <span class="tag blue">架构机理</span>
+    </div>
+    <div class="mermaid" data-mermaid-src="flowchart LR
+    A[需求 Brief / 数据 / 剧本] --> B{选择技术路线}
+    B -->|路线 A: 纯视频模型| C1[Prompt / 参考资产]
+    C1 --> D1[潜空间扩散采样 4-30s]
+    D1 --> E1[拼接 + 后期配音压字幕]
+    E1 -.->|改字/局部动作 = 整段重抽 + 对轨| C1
+
+    B -->|路线 B: 纯 Code2Video| C2[Coding Agent + 视频 Harness]
+    C2 --> D2[生成 HTML / React / WebGPU / Manim]
+    D2 --> E2[确定性渲染 Chromium / Dawn / wgpu]
+    E2 --> F2[Git 可审计源码 + 成片 MP4]
+    F2 -.->|改文案/第N版变量 = 零 LLM 成本重渲| D2
+
+    B -->|路线 C: 混合双引擎| C3[编排/预演层: 时间轴与 3D 白模]
+    C3 --> D3[像素供片层: 视频模型出写实镜头]
+    D3 --> E3[代码合成层: 压印字幕图表与转场]
+    E3 --> F3[版本化 Manifest + 成片 MP4]"><span class="mermaid-loading">架构图加载中…</span></div>
+  </div>
+
+  <div class="split-grid">
+    <div class="doc-card">
+      <h4>纯像素视频模型的三大物理硬边界</h4>
+      <ul>
+        <li><strong>非局部可控性</strong>：改第 4 秒文案或产品颜色往往触发整段重新采样，无法独立改单层图层。</li>
+        <li><strong>精确符号幻觉</strong>：UI 界面、财务数字、长串中文与公式在潜空间采样中极易扭曲错字。</li>
+        <li><strong>单次时长与拼接税</strong>：主流单段上限为 4–30s（Veo 3.1 4–8s、Omni 1.2 Flash 15s、Kling 4.0 / Wan 3.0 / Seedance 2.5 30s），长片跨段拼接易生人物色调断层。</li>
+      </ul>
+    </div>
+    <div class="doc-card accent-card">
+      <h4>混合双引擎的两种落地形态（2026 收敛方向）</h4>
+      <ul>
+        <li><strong>工业编排（Code-as-Orchestrator）</strong>：代码统筹节拍时间轴、字幕与数据卡片，视频模型仅作写实镜头供片方（代表：OpenMontage、<em>Always Allow</em>、Anfloy）。</li>
+        <li><strong>物理白模预演（Code-as-Previs）</strong>：微软 CVM、VideoCoCo 与 Video-Coder 先用 Three.js/Blender 灰模锁死碰撞、计数与相机轨迹，再注入扩散模型早期采样；但灰模不带表面反光信息，Material 维度仍弱于纯像素模型。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>四代 Code2Video 渲染引擎对比（2026-11 一手核验）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>代际与引擎</th>
+          <th>渲染内核</th>
+          <th>实测速度与内存占用</th>
+          <th>协议与企业收费门槛</th>
+          <th>最适业务场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="cell-main">1代 · Remotion v4.0.539</span><span class="tag">React / TSX</span></td>
+          <td>React 组件 + Chromium + FFmpeg</td>
+          <td>10s 1080p 中位 <span class="num-mono">6.35s</span>（M2）；Lambda 1m 算力 <span class="num-mono">$0.017–$0.021</span></td>
+          <td><strong>Source-available</strong>：≤3 人免费；<strong>≥4 人（按全公司人数计）</strong> $25/席或 Automators $0.01/次（最低 $100/月）</td>
+          <td>React 技术栈团队、Player 浏览器零成本预览、万人级 Lambda 批产</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">2代 · HyperFrames v0.9.44</span><span class="tag blue">Apache-2.0</span></td>
+          <td>原生 HTML/CSS + GSAP + Chrome</td>
+          <td>10s 1080p 单 worker 测 <span class="num-mono">16.18s</span>；v0.9 默认半核（上限 4 workers）</td>
+          <td><strong>Apache-2.0</strong>：任何规模企业免费商用，零按次渲染费</td>
+          <td>≥4 人团队避开许可门禁、Agent 自主出片（无 JSX 编译报错）</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">2代 · OpenFilm (7.4K★)</span><span class="tag">MIT</span></td>
+          <td>单 <code>film.html</code> + <code>frame(t)</code> 纯函数</td>
+          <td>4s 1080p30 双 worker <span class="num-mono">6.9s</span>；Studio 内存 871–1,281 MB</td>
+          <td><strong>MIT</strong>（仅名称商标受限）</td>
+          <td><code>look</code> 双序检测防漂移；可导出 FCP / Premiere / DaVinci 时间轴</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">3代 · Framefields v2.1/2.2</span><span class="tag teal">原生 WebGPU</span></td>
+          <td>TypeScript + Node WebGPU (Dawn)</td>
+          <td>255 帧 1080p30 M1 Pro <span class="num-mono">2.6s–3.6s</span>；内存 200–400 MB（无 GPU 慢 10–12×）</td>
+          <td><strong>Apache-2.0</strong>（可选云 GPU 按秒计费，$1.18/6620 GPU 秒）</td>
+          <td>脱离浏览器的高并发云端渲染、PBR 3D + 50 特效 + 本机 ONNX 抠像</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">3代 · ManimGX / OxFrame</span><span class="tag teal">Rust + wgpu</span></td>
+          <td>Python (Manim) / Rust → wgpu GPU</td>
+          <td>ManimGX 36.2s 1080p60 仅 <span class="num-mono">3.08s</span>（比 Manim CE 快 <strong>90.6×</strong>，M4 Pro）</td>
+          <td>ManimGX 代码 MIT / 预编译轮子含 x264 为 GPL-3.0+；OxFrame 为 Apache-2.0</td>
+          <td>数学/物理/算法硬核科普（自带 Typst 排版与 <code>inspect</code> 重叠检查）</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">4代 · Blender (bpy) + RunPod</span><span class="tag amber">物理 3D</span></td>
+          <td>Python 驱动 Cycles / Eevee</td>
+          <td>4K 渲染以小时计（如 <em>The Edge</em> 59s 4K 10 GPU 耗 52m / $5.75）</td>
+          <td><strong>GPL-3.0</strong>（输出成片不受传染）</td>
+          <td>真实光学材质 3D 产品片与 Previs 白模生成（返工等待税较重）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="report-section reveal" id="cost">
+  <div class="section-head">
+    <div class="section-no">Section 03 · Pricing &amp; Benchmarks</div>
+    <h2>双路线真实价格表与 Code2Video-AA 基准</h2>
+    <p class="section-lead">所有定价于 2026-11-16 核验自官网与一手实测数据库，表格采用并排价格列呈现“名义单价 vs 真实成品单价”落差。</p>
+  </div>
+
+  <h3>3.1 纯视频生成模型：官方 API 单价 vs 商业成品秒</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>模型与官方渠道</th>
+          <th>关键规格与计费特点</th>
+          <th>名义 API 单价（官方直连）</th>
+          <th>商业严审可用率</th>
+          <th>真实每成品可用秒</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="cell-main">Google Gemini Omni 1.2 Flash</span><span class="tag blue">Gemini API · 11/05 GA</span></td>
+          <td>$12/MTok 视频输出；3–15s；支持对话式局部修改与延长</td>
+          <td>
+            <div class="cell-row"><span>360p / 720p</span><strong class="num-mono">$0.023 / $0.07/s</strong></div>
+            <div class="cell-row"><span>1080p / 4K 升频</span><span class="num-mono">$0.104 / $0.209/s</span></div>
+          </td>
+          <td>局部改图减少重抽<br><span class="num-mono">~1.5×–2.2×</span></td>
+          <td><strong class="num-mono">$0.11 – $0.23 / s</strong><br>（含原生音画）</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">Google Veo 3.1 (Lite/Fast/Std)</span><span class="tag blue">Vertex AI GA</span></td>
+          <td>按秒计费；4/6/8s；不可关闭 SynthID（Gemini 预览版已于 10/22 停服）</td>
+          <td>
+            <div class="cell-row"><span>Lite 720p / 1080p</span><span class="num-mono">$0.05 / $0.08/s</span></div>
+            <div class="cell-row"><span>Fast 720 / 1080 / 4K</span><span class="num-mono">$0.10 / $0.12 / $0.30</span></div>
+            <div class="cell-row"><span>Std 1080p / 4K 有声</span><strong class="num-mono">$0.40 / $0.60/s</strong></div>
+          </td>
+          <td>过稿率 ~38%<br><span class="num-mono">2.0×–2.63×</span>（严审 4–6×）</td>
+          <td>Lite <span class="num-mono">$0.10–$0.21/s</span><br>Std <strong class="num-mono">$1.00–$3.00/s</strong></td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">ByteDance Seedance 2.5 / Flash</span><span class="tag blue">BytePlus / 火山方舟</span></td>
+          <td>按视频 Token；2.5 旗舰 30s + 50 参考；2.5 Flash 于 11/15 开 API（仅至 720p）</td>
+          <td>
+            <div class="cell-row"><span>2.5 Flash 720p</span><strong class="num-mono">$0.152/s (¥0.99)</strong></div>
+            <div class="cell-row"><span>2.5 旗舰 480 / 720p</span><span class="num-mono">$0.103 / $0.231/s</span></div>
+            <div class="cell-row"><span>2.5 旗舰 1080p</span><strong class="num-mono">$0.569/s (¥5.61)</strong></div>
+          </td>
+          <td>多参考过稿率 58%<br><strong class="num-mono">1.72×</strong></td>
+          <td>720p <span class="num-mono">$0.26–$0.45/s</span><br>1080p <strong class="num-mono">$0.98–$1.30/s</strong></td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">Kuaishou Kling 3.0 / 4.0</span><span class="tag blue">Kling API / fal</span></td>
+          <td>4.0 支持 3–30s + 10 关键帧 + 15 参考（强制立体声，API 暂最高 1080p）</td>
+          <td>
+            <div class="cell-row"><span>4.0 Flash 720p</span><span class="num-mono">$0.094/s</span></div>
+            <div class="cell-row"><span>4.0 720p / 1080p</span><strong class="num-mono">$0.157 / $0.235/s</strong></div>
+            <div class="cell-row"><span>3.0 4K 有声</span><span class="num-mono">$0.42/s</span></div>
+          </td>
+          <td>过稿率 45%–52%<br><span class="num-mono">1.92×–2.22×</span></td>
+          <td>4.0 720p <span class="num-mono">$0.30–$0.35/s</span><br>4.0 1080p <strong class="num-mono">$0.45–$0.55/s</strong></td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">Alibaba Wan 3.0</span><span class="tag blue">Model Studio / 百炼</span></td>
+          <td>按输入+输出总秒；2–30s；行业独家支持 PPT/PDF/DOC 直生视频</td>
+          <td>
+            <div class="cell-row"><span>国际 480/720/1080p</span><span class="num-mono">$0.05 / $0.10 / $0.20</span></div>
+            <div class="cell-row"><span>国内百炼（元/秒）</span><span class="num-mono">¥0.45 / ¥0.90 / ¥1.80</span></div>
+          </td>
+          <td>综合可用率<br><span class="num-mono">~2.0×–2.38×</span></td>
+          <td>720p <span class="num-mono">$0.20–$0.25/s</span><br>1080p <strong class="num-mono">$0.40–$0.50/s</strong></td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">MiniMax H3</span><span class="tag blue">MiniMax API（主力）</span></td>
+          <td>4–15s 原生立体声；前 5 张参考图与音频输入免费；部分权重开源</td>
+          <td>
+            <div class="cell-row"><span>H3-Lite 480 / 768p</span><span class="num-mono">$0.025 / $0.04/s</span></div>
+            <div class="cell-row"><span>H3 768p / 2K</span><strong class="num-mono">$0.08 / $0.13/s</strong></div>
+          </td>
+          <td>首成率 ~77%<br><span class="num-mono">~2.08×–2.5×</span></td>
+          <td>Lite 768p <span class="num-mono">$0.08–$0.11/s</span><br>H3 2K <strong class="num-mono">$0.27–$0.35/s</strong></td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">Runway Gen-4.5 / Turbo</span><span class="tag blue">Runway API</span></td>
+          <td>Credits 计价 ($0.01/cr)；无原生语音配音</td>
+          <td>
+            <div class="cell-row"><span>Turbo / Gen-4.5</span><span class="num-mono">$0.05 / $0.12/s</span></div>
+          </td>
+          <td>过稿率 46%<br><span class="num-mono">2.17×–4.0×</span></td>
+          <td><strong class="num-mono">$0.26–$0.48/s</strong><br>（需再叠音频 $50–500/分）</td>
+        </tr>
+        <tr>
+          <td><span class="cell-main">OpenAI Sora 2 / Pro</span><span class="tag red">已停运</span></td>
+          <td>App 已于 2026-04-26 停运；Videos API 于 2026-09-24 关停</td>
+          <td><em>历史价 $0.10–$0.70/s</em></td>
+          <td>—</td>
+          <td><span class="tag red">不可再选用</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 Code2Video-AA 质量与成本帕累托前沿（114 Briefs · HyperFrames）</h3>
+  <div class="visual-panel">
+    <div class="visual-panel-title">
+      <span>图 2｜Code2Video-AA Elo 得分 vs 单任务平均成本（对数横轴）</span>
+      <div class="pareto-controls">
+        <button class="chart-tab active" data-pareto="all">全部核心模型</button>
+        <button class="chart-tab" data-pareto="frontier">仅高亮帕累托最优线</button>
+      </div>
+    </div>
+    <div class="chart-svg-wrap" id="pareto-wrap"></div>
+  </div>
+
+  <div class="asym-grid">
+    <div class="doc-card">
+      <h4>模板化 / 强 Skill 路线真实账本（$0.13 – $5 / 条）</h4>
+      <ul>
+        <li><strong>NiharDaily / 汇智网测试</strong>：挂载 <code>remotion-dev/skills</code>，单条短片 API 成本仅 <strong>$0.13–$0.66</strong>。</li>
+        <li><strong>Nate Herk（HyperFrames）</strong>：30–40s 短片消耗 125K–260K tokens（~$0.6–$4.8）；关键靠 <code>/clear + handoff</code> 重置上下文防账单平方膨胀。</li>
+        <li><strong>模板化科普（CSDN 实战）</strong>：5 分钟科普片总 API 成本 <strong>&lt; ¥5</strong>（含 MiniMax TTS ¥1–3），30 分钟交付。</li>
+      </ul>
+    </div>
+    <div class="doc-card warn-card">
+      <h4>长程多 Agent 与重度 3D 账本（$20 – $550+ / 条）</h4>
+      <ul>
+        <li><strong>Ciyo 39s 品牌片</strong>：47 子 Agent 并行 4h55m，消耗 3.84M 输出 + 517M 缓存 Token，列表价折合 <strong>~$248</strong>。</li>
+        <li><strong><em>Always Allow</em> 4:37 MV 全审计账本</strong>：119 镜头、3,700 次工具调用、11 亿 tokens + 外部媒体 API 实付 <strong>$76.60</strong>。</li>
+        <li><strong>Fable 5.2 vs Opus 5.5 同题对照</strong>：冰之大教堂/火箭/火柴人实测账单为 Opus 的 <strong>1.76×–2.27×</strong>（$81.10/$23.45/$40.36 vs $45.97/$10.35/$18.88）。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="report-section reveal" id="decision">
+  <div class="section-head">
+    <div class="section-no">Section 04 · Decision Matrix</div>
+    <h2>7 类商业场景选型决策矩阵</h2>
+    <p class="section-lead">对照业务场景特征直接锁定架构组合，避免在错误路线上堆叠预算。</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>业务场景</th>
+          <th>推荐路线</th>
+          <th>推荐技术栈组合</th>
+          <th>经济与工程决胜点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. SaaS 产品发布片 &amp; PR 变更日志</strong></td>
+          <td><span class="tag blue">纯 Code2Video</span></td>
+          <td>HyperFrames / OpenFilm + Playwright + GPT-6.1 Sol / Opus 5.5</td>
+          <td>UI 与代码零失真；脚本进 Git 与 CI/CD 联动，迭代只改增量。</td>
+        </tr>
+        <tr>
+          <td><strong>2. 千人千面年度回顾 / 财报简报</strong></td>
+          <td><span class="tag blue">纯 C2V（模板化）</span></td>
+          <td>Remotion Lambda（React 团队）或 HyperFrames <code>--batch</code></td>
+          <td>建好模板后批产 10,000 条仅付 ~$200 云算力，LLM 边际 Token 归零。</td>
+        </tr>
+        <tr>
+          <td><strong>3. 数学 / 算法 / 物理硬核科普</strong></td>
+          <td><span class="tag blue">纯 C2V（专用引擎）</span></td>
+          <td>ManimGX / Code2Video + Whisper 字级对齐 + 本地 TTS</td>
+          <td>公式几何严格精确；ManimGX 将单次渲染压至 3 秒级，全片 &lt;¥5。</td>
+        </tr>
+        <tr>
+          <td><strong>4. 品牌情绪片、自然风光、写实人物</strong></td>
+          <td><span class="tag amber">纯视频生成模型</span></td>
+          <td>Omni 1.2 Flash（对话改图）/ Kling 4.0（30s）/ Veo 3.1</td>
+          <td>皮肤光影是代码天花板；用 <strong>480p Draft / Lite 抽卡 + 精选 1080p</strong> 降本 40%–77%。</td>
+        </tr>
+        <tr>
+          <td><strong>5. 电商广告百变体矩阵 / 带货短剧</strong></td>
+          <td><span class="tag teal">混合双引擎</span></td>
+          <td>Seedance 2.5 / Kling 4.0（锁商品）+ HyperFrames（叠价格/画幅）</td>
+          <td>多参考把商用过稿率提至 58%；<strong>价格与免责声明严禁扩散生成</strong>，由代码压印。</td>
+        </tr>
+        <tr>
+          <td><strong>6. 物理精准的复杂 3D 广告 / 仿真</strong></td>
+          <td><span class="tag teal">混合 (Code-as-Previs)</span></td>
+          <td>Three.js / Blender 白模预演 + CVM / Video-Coder / Seedance</td>
+          <td>代码先算准物体计数与碰撞轨迹，再让视频模型补全光影材质。</td>
+        </tr>
+        <tr>
+          <td><strong>7. 口播 / 访谈 / 录屏粗剪与切片</strong></td>
+          <td><span class="tag teal">Agentic EDL 剪辑</span></td>
+          <td>video-use + ElevenLabs Scribe / Whisper + FFmpeg</td>
+          <td>不重绘原片像素，用 12KB 带时间戳文本决策切点，避开 4,500 万看图 Token。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="report-section reveal" id="playbook">
+  <div class="section-head">
+    <div class="section-no">Section 05 · Engineering Playbook</div>
+    <h2>C2V 与混合管线五大工程降本法则（省 50%–80%）</h2>
+    <p class="section-lead">模型牌价只是起点，决定最终账单上限的是路由策略、修复粒度与音画对齐顺序。</p>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <strong>1. 模型分层路由（Orchestrator + Worker），告别全链路用 Opus / Fable</strong>
+      <span>用 Opus 5.5 或 Fable 5.2 生成顶层视觉规范（<code>DESIGN.md</code>）与核心镜头原型；将组件填槽与样式微调下放给 <strong>GPT-6.1 Sol（$0.31/任务，1369 Elo）</strong> 或 <strong>Haiku 5.5（$0.08）</strong>，削减 80%–90% 推理费用。</span>
+    </div>
+    <div class="tl-item">
+      <strong>2. 局部自修复（ScopeRefine）优先于盲目并行</strong>
+      <span>Code2Video 消融实验显示，去掉并行仅影响墙钟时间（×5.6），而去掉局部修复改用全量重抽会同时让<strong>时间 ×2.8、Token ×1.6</strong>。</span>
+    </div>
+    <div class="tl-item">
+      <strong>3. 上下文阈值截断（150K Token 防雪崩法则）</strong>
+      <span>单会话接近 150K tokens 时立即执行 <code>/clear</code> 并通过 <code>HANDOFF.md</code> 摘要交接，以 ~5K tokens 重启新会话，避免历史 HTML 反复重传引发平方级账单。</span>
+    </div>
+    <div class="tl-item">
+      <strong>4. 启用专用视频 Harness 并严守确定性三禁令</strong>
+      <span>HeyGen 实测专用视频 Harness（拼图抽帧 Contact Sheet + 响度检测 + 安全区检查）可减少 <strong>~35% 交互轮次与 ~30% 成本</strong>；代码严禁读系统时间、无种子随机与渲染期联网。</span>
+    </div>
+    <div class="tl-item">
+      <strong>5. 先“量”音轨再“算”时间轴，提前隔离许可与色域暗坑</strong>
+      <span>先出 TTS 并用 Whisper/<code>wav2vec2</code> 对齐字级时间戳驱动动画（防按字数估算到第 15 句漂移 5 秒）；≥4 人公司留意 Remotion 全员门禁；混剪统一转码 <code>yuv420p</code> 并 <code>await document.fonts.ready</code>。</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:36px;">权威信源索引</h3>
+  <details class="acc-item">
+    <summary>点击展开一手信源与学术论文索引（核验窗口：2026-11-16）</summary>
+    <div class="acc-body">
+      <ul>
+        <li><strong>官方定价与文档（A 级）</strong>：Anthropic Pricing &amp; Claude Fable 5.2 Release（2026-11-09）；Google AI Studio（Gemini Omni 1.2 Flash 2026-11-05 GA）&amp; Vertex AI Pricing；OpenAI Sora 2 Deprecation Notice（2026-09-24）；BytePlus ModelArk &amp; 火山方舟 Seedance 2.5 / 2.5 Flash（2026-11-15）；MiniMax H3 Pricing；Alibaba Cloud Model Studio Wan 3.0；Kling AI 3.0/4.0 Developer Pricing &amp; fal.ai；Remotion License &amp; Lambda Cost Docs；HyperFrames / Framefields / ManimGX / OpenFilm GitHub。</li>
+        <li><strong>独立基准与实测账本（A/B 级）</strong>：Artificial Analysis × HeyGen <em>Code2Video-AA</em>（2026-10-26）；NiharDaily 渲染对比实测（2026-10-16）；Viralance AI Video Report（2026-11-12，1,677 生成 / 561 任务）；CoderLegion 60-Prompt Benchmark；Apostle 商用追踪；GitHub <code>mortenbrudvik/always-allow</code>（<code>runlog.csv</code> / <code>ledger.csv</code>）。</li>
+        <li><strong>学术前沿论文（arXiv）</strong>：Code2Video（2510.01174）、Code2Video-Compass（2610.28416）、Video-Coder（2611.09894）、VideoCoCo（2607.27380）、ManimCode（2611.08294）、AVA-Encoder（2608.12313）、Code World Model（2608.25927）、Microsoft Research <em>Code Video Model</em>。</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<footer class="doc-footer">
+  <p>Code2Video 与纯视频模型选型决策报告 · 核验基准日 2026-11-16 · 所有价格与基准均为检索时点公开快照。</p>
+</footer>
+
+</main>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  // 1. Pareto Chart (Code2Video-AA)
+  var paretoModels = [
+    { name: 'MiMo-V2.6-Flash', cost: 0.01, elo: 1052, frontier: true },
+    { name: 'DeepSeek V4.1 Flash', cost: 0.03, elo: 1053, frontier: true },
+    { name: 'Claude Haiku 5.5', cost: 0.08, elo: 1192, frontier: true },
+    { name: 'GPT-6.1 Sol', cost: 0.31, elo: 1369, frontier: true },
+    { name: 'Gemini 4 Argon', cost: 0.45, elo: 1259, frontier: false },
+    { name: 'GPT-6 Astra', cost: 1.62, elo: 1427, frontier: false },
+    { name: 'Claude Sonnet 5.5', cost: 1.85, elo: 1443, frontier: true },
+    { name: 'Claude Opus 5.5', cost: 3.08, elo: 1536, frontier: true },
+    { name: 'Claude Fable 5.1', cost: 3.89, elo: 1325, frontier: false }
+  ];
+  var paretoMode = 'all';
+
+  function renderPareto() {
+    var wrap = document.getElementById('pareto-wrap');
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    var W = 680, H = 265, padL = 54, padR = 26, padT = 22, padB = 40;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var minX = Math.log10(0.008), maxX = Math.log10(5.0);
+    var minY = 980, maxY = 1580;
+
+    function sx(c) { return padL + ((Math.log10(c) - minX) / (maxX - minX)) * plotW; }
+    function sy(e) { return padT + plotH - ((e - minY) / (maxY - minY)) * plotH; }
+
+    var ns = 'http://www.w3.org/2000/svg';
+    function svgEl(tag, attrs, textVal) {
+      var el = document.createElementNS(ns, tag);
+      Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
+      if (textVal !== undefined) el.textContent = textVal;
+      return el;
+    }
+
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H });
+    [1000, 1150, 1300, 1450, 1550].forEach(function (yVal) {
+      var yy = sy(yVal).toFixed(1);
+      svg.appendChild(svgEl('line', { x1: padL, y1: yy, x2: W - padR, y2: yy, stroke: '#e5e7eb', 'stroke-dasharray': '3,3' }));
+      svg.appendChild(svgEl('text', { x: padL - 8, y: parseFloat(yy) + 4, 'text-anchor': 'end', 'font-size': '11', fill: '#64748b', 'font-family': 'ui-monospace,monospace' }, String(yVal)));
+    });
+    [0.01, 0.05, 0.1, 0.3, 1.0, 3.0].forEach(function (xVal) {
+      var xx = sx(xVal).toFixed(1);
+      svg.appendChild(svgEl('line', { x1: xx, y1: padT, x2: xx, y2: H - padB, stroke: '#f1f5f9' }));
+      svg.appendChild(svgEl('text', { x: xx, y: H - padB + 17, 'text-anchor': 'middle', 'font-size': '11', fill: '#64748b', 'font-family': 'ui-monospace,monospace' }, '$' + xVal));
+    });
+    svg.appendChild(svgEl('line', { x1: padL, y1: H - padB, x2: W - padR, y2: H - padB, stroke: '#94a3b8' }));
+    svg.appendChild(svgEl('line', { x1: padL, y1: padT, x2: padL, y2: H - padB, stroke: '#94a3b8' }));
+    svg.appendChild(svgEl('text', { x: padL + plotW / 2, y: H - 5, 'text-anchor': 'middle', 'font-size': '11.5', fill: '#475569' }, '单次任务平均成本（USD，对数轴）'));
+
+    var fPts = paretoModels.filter(function (m) { return m.frontier; }).sort(function (a, b) { return a.cost - b.cost; });
+    var pathD = fPts.map(function (m, idx) {
+      return (idx === 0 ? 'M' : 'L') + sx(m.cost).toFixed(1) + ',' + sy(m.elo).toFixed(1);
+    }).join(' ');
+    svg.appendChild(svgEl('path', { d: pathD, fill: 'none', stroke: '#0075de', 'stroke-width': '2', 'stroke-dasharray': '5,4', opacity: '0.8' }));
+
+    paretoModels.forEach(function (m) {
+      if (paretoMode === 'frontier' && !m.frontier) return;
+      var cx = sx(m.cost), cy = sy(m.elo);
+      var col = m.name.indexOf('Sol') !== -1 ? '#0f766e' : (m.frontier ? '#0075de' : '#d97706');
+      var r = m.name.indexOf('Sol') !== -1 || m.name.indexOf('Opus') !== -1 ? 6.5 : 5;
+      svg.appendChild(svgEl('circle', { cx: cx.toFixed(1), cy: cy.toFixed(1), r: r, fill: col, stroke: '#ffffff', 'stroke-width': '1.5' }));
+      var dx = m.cost > 2.5 ? -8 : 8;
+      var anchor = m.cost > 2.5 ? 'end' : 'start';
+      var dy = m.name === 'GPT-6 Astra' ? 14 : (m.name === 'Claude Fable 5.1' ? 14 : -7);
+      svg.appendChild(svgEl('text', { x: (cx + dx).toFixed(1), y: (cy + dy).toFixed(1), 'text-anchor': anchor, 'font-size': '11', 'font-weight': m.frontier ? '700' : '400', fill: '#0f172a' }, m.name + ' (' + m.elo + ' / $' + m.cost.toFixed(2) + ')'));
+    });
+    wrap.appendChild(svg);
+  }
+
+  document.querySelectorAll('[data-pareto]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-pareto]').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      paretoMode = btn.getAttribute('data-pareto');
+      renderPareto();
+    });
+  });
+  renderPareto();
+
+  // 2. Interactive TCO Model & Break-Even Curve
+  var curveAxis = 'rounds';
+
+  function computeTCO(dur, rounds, variants, photoPct, vRate, cBase, engineOpt, laborRate) {
+    var scaleDur = dur / 60.0;
+    var aVideo = dur * vRate * (1 + (rounds - 1) * 0.72) * (1 + (variants - 1) * 0.88);
+    var aAudioPost = (vRate < 0.28 ? 25 * scaleDur : 8 * scaleDur) * variants;
+    var aApi = aVideo + aAudioPost;
+    var aLaborH = (3.2 * scaleDur + (rounds - 1) * 1.15 * scaleDur + (variants - 1) * 1.35 * scaleDur);
+    var aLabor = aLaborH * laborRate;
+    var aTotal = aApi + aLabor;
+
+    var bLlm = cBase * (0.65 + 0.35 * scaleDur) * (1 + (rounds - 1) * 0.18) + (variants - 1) * 0.30;
+    var bRender = 0.025 * scaleDur * (rounds + variants - 1);
+    var bLicense = engineOpt === '100' ? Math.max(100, 0.01 * (rounds + variants)) : 0;
+    var bNonLabor = bLlm + bRender + bLicense;
+    var bLaborH = (2.2 * (0.7 + 0.3 * scaleDur) + (rounds - 1) * 0.22 + (variants - 1) * 0.08);
+    var bLabor = bLaborH * laborRate;
+    var bTotal = bNonLabor + bLabor;
+
+    var photoSec = dur * photoPct;
+    var cVideo = photoSec * vRate * (1 + (rounds - 1) * 0.22) * (1 + (variants - 1) * 0.12);
+    var cLlm = cBase * (0.60 + 0.30 * scaleDur) * (1 + (rounds - 1) * 0.15) + (variants - 1) * 0.30;
+    var cRender = 0.025 * scaleDur * (rounds + variants - 1);
+    var cLicense = engineOpt === '100' ? Math.max(100, 0.01 * (rounds + variants)) : 0;
+    var cNonLabor = cVideo + cLlm + cRender + cLicense;
+    var cLaborH = (1.8 * (0.7 + 0.3 * scaleDur) + (rounds - 1) * 0.30 + (variants - 1) * 0.14 + photoPct * 0.8);
+    var cLabor = cLaborH * laborRate;
+    var cTotal = cNonLabor + cLabor;
+
+    return {
+      a: { total: aTotal, video: aApi, code: 0, labor: aLabor, laborH: aLaborH },
+      b: { total: bTotal, video: 0, code: bNonLabor, labor: bLabor, laborH: bLaborH, license: bLicense },
+      c: { total: cTotal, video: cVideo, code: cLlm + cRender + cLicense, labor: cLabor, laborH: cLaborH, license: cLicense }
+    };
+  }
+
+  function renderStack(id, item, maxVal) {
+    var el = document.getElementById(id);
+    while (el.firstChild) el.removeChild(el.firstChild);
+    [
+      { w: (item.video / maxVal) * 100, bg: '#d97706' },
+      { w: (item.code / maxVal) * 100, bg: '#0075de' },
+      { w: (item.labor / maxVal) * 100, bg: '#94a3b8' }
+    ].forEach(function (seg) {
+      var d = document.createElement('div');
+      d.className = 'seg';
+      d.style.width = seg.w.toFixed(1) + '%';
+      d.style.background = seg.bg;
+      el.appendChild(d);
+    });
+  }
+
+  function renderSplitCells(id, rows) {
+    var el = document.getElementById(id);
+    while (el.firstChild) el.removeChild(el.firstChild);
+    rows.forEach(function (r) {
+      var box = document.createElement('div');
+      box.className = 'tco-split-cell';
+      var k = document.createElement('span');
+      k.textContent = r.k;
+      var v = document.createElement('span');
+      v.className = 'num-mono';
+      v.textContent = r.v;
+      box.appendChild(k);
+      box.appendChild(v);
+      el.appendChild(box);
+    });
+  }
+
+  function renderCurve(dur, rounds, variants, photoPct, vRate, cBase, engineOpt, laborRate) {
+    var wrap = document.getElementById('tco-curve-wrap');
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    var W = 640, H = 225, padL = 56, padR = 24, padT = 18, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var ns = 'http://www.w3.org/2000/svg';
+    function svgEl(tag, attrs, textVal) {
+      var el = document.createElementNS(ns, tag);
+      Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
+      if (textVal !== undefined) el.textContent = textVal;
+      return el;
+    }
+
+    var xs = curveAxis === 'rounds' ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2, 4, 6, 8, 12, 16, 20];
+    document.getElementById('curve-title').textContent = curveAxis === 'rounds'
+      ? '盈亏平衡曲线：累计 TCO 随改稿轮次变化（固定 ' + variants + ' 个版本）'
+      : '盈亏平衡曲线：累计 TCO 随变体数量变化（固定 ' + rounds + ' 轮修改）';
+
+    var pts = xs.map(function (x) {
+      var res = curveAxis === 'rounds'
+        ? computeTCO(dur, x, variants, photoPct, vRate, cBase, engineOpt, laborRate)
+        : computeTCO(dur, rounds, x, photoPct, vRate, cBase, engineOpt, laborRate);
+      return { x: x, a: res.a.total, b: res.b.total, c: res.c.total };
+    });
+
+    var maxY = 10;
+    pts.forEach(function (p) { maxY = Math.max(maxY, p.a, p.b, p.c); });
+    maxY = Math.ceil(maxY / 50) * 50;
+
+    function sx(idx) { return padL + (idx / (xs.length - 1)) * plotW; }
+    function sy(val) { return padT + plotH - (val / maxY) * plotH; }
+
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H });
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (ratio) {
+      var yv = Math.round(maxY * ratio);
+      var yy = sy(yv).toFixed(1);
+      svg.appendChild(svgEl('line', { x1: padL, y1: yy, x2: W - padR, y2: yy, stroke: '#e5e7eb', 'stroke-dasharray': '3,3' }));
+      svg.appendChild(svgEl('text', { x: padL - 8, y: parseFloat(yy) + 4, 'text-anchor': 'end', 'font-size': '11', fill: '#64748b', 'font-family': 'ui-monospace,monospace' }, '$' + yv));
+    });
+
+    xs.forEach(function (x, i) {
+      var xx = sx(i).toFixed(1);
+      var isCurr = (curveAxis === 'rounds' && x === rounds) || (curveAxis === 'variants' && x === variants);
+      if (isCurr) {
+        svg.appendChild(svgEl('line', { x1: xx, y1: padT, x2: xx, y2: H - padB, stroke: '#0075de', 'stroke-width': '1.2', 'stroke-dasharray': '2,2' }));
+      }
+      svg.appendChild(svgEl('text', { x: xx, y: H - padB + 17, 'text-anchor': 'middle', 'font-size': '11', 'font-weight': isCurr ? '700' : '400', fill: isCurr ? '#0075de' : '#64748b', 'font-family': 'ui-monospace,monospace' }, x + (curveAxis === 'rounds' ? '轮' : '版')));
+    });
+
+    [
+      { key: 'a', color: '#d97706' },
+      { key: 'b', color: '#0075de' },
+      { key: 'c', color: '#0f766e' }
+    ].forEach(function (s) {
+      var d = pts.map(function (p, i) {
+        return (i === 0 ? 'M' : 'L') + sx(i).toFixed(1) + ',' + sy(p[s.key]).toFixed(1);
+      }).join(' ');
+      svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: s.color, 'stroke-width': '2.5' }));
+      var last = pts[pts.length - 1];
+      svg.appendChild(svgEl('circle', { cx: sx(pts.length - 1).toFixed(1), cy: sy(last[s.key]).toFixed(1), r: '3.8', fill: s.color }));
+    });
+
+    var g = svgEl('g', { transform: 'translate(' + (padL + 10) + ',' + (padT + 4) + ')' });
+    g.appendChild(svgEl('rect', { x: 0, y: 0, width: 245, height: 24, rx: 5, fill: '#ffffff', 'fill-opacity': '0.92', stroke: '#e2e8f0' }));
+    [
+      { cx: 14, tx: 23, col: '#d97706', txt: 'A 纯视频' },
+      { cx: 92, tx: 101, col: '#0075de', txt: 'B 纯C2V' },
+      { cx: 170, tx: 179, col: '#0f766e', txt: 'C 混合' }
+    ].forEach(function (lg) {
+      g.appendChild(svgEl('circle', { cx: lg.cx, cy: 12, r: 4, fill: lg.col }));
+      g.appendChild(svgEl('text', { x: lg.tx, y: 16, 'font-size': '11', fill: '#1e293b' }, lg.txt));
+    });
+    svg.appendChild(g);
+    wrap.appendChild(svg);
+  }
+
+  function updateTCO() {
+    var dur = parseInt(document.getElementById('in-dur').value, 10);
+    var rounds = parseInt(document.getElementById('in-rounds').value, 10);
+    var variants = parseInt(document.getElementById('in-variants').value, 10);
+    var photoPct = parseInt(document.getElementById('in-photoreal').value, 10) / 100;
+    var vRate = parseFloat(document.getElementById('in-vmodel').value);
+    var cBase = parseFloat(document.getElementById('in-cmodel').value);
+    var engineOpt = document.getElementById('in-engine').value;
+    var laborRate = parseFloat(document.getElementById('in-labor').value);
+
+    document.getElementById('v-dur').textContent = dur + ' 秒';
+    document.getElementById('v-rounds').textContent = rounds + ' 轮';
+    document.getElementById('v-variants').textContent = variants + ' 个';
+    document.getElementById('v-photoreal').textContent = Math.round(photoPct * 100) + '%';
+
+    var res = computeTCO(dur, rounds, variants, photoPct, vRate, cBase, engineOpt, laborRate);
+    var maxVal = Math.max(res.a.total, res.b.total, res.c.total, 1);
+
+    document.getElementById('price-a').textContent = '$' + Math.round(res.a.total).toLocaleString();
+    renderStack('stack-a', res.a, maxVal);
+    renderSplitCells('split-a', [
+      { k: '视频抽卡/后配', v: '$' + res.a.video.toFixed(1) },
+      { k: '代码/许可', v: '$0' },
+      { k: '人工 (' + res.a.laborH.toFixed(1) + 'h)', v: '$' + Math.round(res.a.labor) }
+    ]);
+
+    document.getElementById('price-b').textContent = '$' + Math.round(res.b.total).toLocaleString();
+    renderStack('stack-b', res.b, maxVal);
+    renderSplitCells('split-b', [
+      { k: '视频抽卡', v: '$0' },
+      { k: 'LLM/渲染' + (res.b.license > 0 ? '+许可' : ''), v: '$' + res.b.code.toFixed(1) },
+      { k: '人工 (' + res.b.laborH.toFixed(1) + 'h)', v: '$' + Math.round(res.b.labor) }
+    ]);
+    document.getElementById('warn-b').style.display = photoPct >= 0.35 ? 'block' : 'none';
+
+    document.getElementById('price-c').textContent = '$' + Math.round(res.c.total).toLocaleString();
+    renderStack('stack-c', res.c, maxVal);
+    renderSplitCells('split-c', [
+      { k: '写实供片', v: '$' + res.c.video.toFixed(1) },
+      { k: 'LLM/渲染' + (res.c.license > 0 ? '+许可' : ''), v: '$' + res.c.code.toFixed(1) },
+      { k: '人工 (' + res.c.laborH.toFixed(1) + 'h)', v: '$' + Math.round(res.c.labor) }
+    ]);
+
+    ['a', 'b', 'c'].forEach(function (k) {
+      document.getElementById('card-' + k).classList.remove('winner', 'blocked');
+      document.getElementById('badge-' + k).textContent = '';
+      document.getElementById('badge-' + k).className = 'tag';
+    });
+    if (photoPct >= 0.35) document.getElementById('card-b').classList.add('blocked');
+
+    var verdict = '';
+    if (photoPct >= 0.65 && rounds === 1 && variants === 1) {
+      document.getElementById('card-a').classList.add('winner');
+      document.getElementById('badge-a').textContent = '推荐最优';
+      document.getElementById('badge-a').className = 'tag amber';
+      verdict = '当前写实占比 ≥65% 且为单版一次性交付（1 轮 × 1 版）：纯视频模型无需搭建代码工程，首版性价比与画质最优。';
+    } else if (photoPct <= 0.15) {
+      document.getElementById('card-b').classList.add('winner');
+      document.getElementById('badge-b').textContent = '推荐最优';
+      document.getElementById('badge-b').className = 'tag blue';
+      verdict = '写实镜头极低（≤15%）：首选纯 Code2Video。模板建成后，' + rounds + ' 轮修改与 ' + variants + ' 个版本边际成本趋近于零，比纯视频省约 ' + Math.max(0, Math.round((1 - res.b.total / res.a.total) * 100)) + '%。';
+    } else {
+      document.getElementById('card-c').classList.add('winner');
+      document.getElementById('badge-c').textContent = '推荐最优';
+      document.getElementById('badge-c').className = 'tag teal';
+      verdict = '兼顾 ' + Math.round(photoPct * 100) + '% 写实镜头与多轮改稿/多版本复用（' + rounds + ' 轮 × ' + variants + ' 版）：混合双引擎 TCO 最优，比纯视频模型节省约 ' + Math.max(0, Math.round((1 - res.c.total / res.a.total) * 100)) + '% 总成本。';
+    }
+    document.getElementById('sim-verdict').textContent = verdict;
+
+    renderCurve(dur, rounds, variants, photoPct, vRate, cBase, engineOpt, laborRate);
+  }
+
+  var presets = {
+    social:    { dur: 30, rounds: 1, variants: 1, photo: 90, vmodel: '0.16', cmodel: '6.5', engine: '0' },
+    saas:      { dur: 60, rounds: 3, variants: 3, photo: 25, vmodel: '0.48', cmodel: '6.5', engine: '0' },
+    ecommerce: { dur: 45, rounds: 4, variants: 12, photo: 40, vmodel: '0.48', cmodel: '1.5', engine: '0' },
+    edu:       { dur: 90, rounds: 4, variants: 5, photo: 0, vmodel: '0.48', cmodel: '1.5', engine: '0' }
+  };
+
+  document.querySelectorAll('[data-preset]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-preset]').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var p = presets[btn.getAttribute('data-preset')];
+      document.getElementById('in-dur').value = p.dur;
+      document.getElementById('in-rounds').value = p.rounds;
+      document.getElementById('in-variants').value = p.variants;
+      document.getElementById('in-photoreal').value = p.photo;
+      document.getElementById('in-vmodel').value = p.vmodel;
+      document.getElementById('in-cmodel').value = p.cmodel;
+      document.getElementById('in-engine').value = p.engine;
+      updateTCO();
+    });
+  });
+
+  document.querySelectorAll('[data-axis]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-axis]').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      curveAxis = btn.getAttribute('data-axis');
+      updateTCO();
+    });
+  });
+
+  ['in-dur', 'in-rounds', 'in-variants', 'in-photoreal', 'in-vmodel', 'in-cmodel', 'in-engine', 'in-labor'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', updateTCO);
+    document.getElementById(id).addEventListener('change', updateTCO);
+  });
+
+  updateTCO();
+})();
+</script>
+
+<script>
+(function () {
+  if (!document.querySelector('.mermaid') || window.__mermaidLoaded) return;
+  window.__mermaidLoaded = true;
+  function fallback() {
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      if (el.getAttribute('data-mermaid-done')) return;
+      var pre = document.createElement('pre'), code = document.createElement('code');
+      code.textContent = el.getAttribute('data-mermaid-src') || el.textContent;
+      pre.appendChild(code);
+      el.replaceWith(pre);
+    });
+  }
+  window.__mermaidFallback = fallback;
+  var s = document.createElement('script');
+  s.type = 'module';
+  s.textContent =
+    'import("https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs").then(function(mod){'
+    + 'var mermaid = mod.default;'
+    + 'mermaid.initialize({startOnLoad:false,theme:"base",themeVariables:{'
+    +   'primaryColor:"#f5f9ff",primaryBorderColor:"#0075de",primaryTextColor:"#17202b",'
+    +   'secondaryColor:"#f0fdfa",tertiaryColor:"#ffffff",lineColor:"#0075de",'
+    +   'textColor:"#17202b",mainBkg:"#f6f5f4",nodeBorder:"#0075de",'
+    +   'edgeLabelBackground:"#ffffff",'
+    +   'fontFamily:"-apple-system, PingFang SC, Microsoft YaHei, sans-serif"}});'
+    + 'document.querySelectorAll(".mermaid").forEach(function(el){el.textContent=el.getAttribute("data-mermaid-src")||el.textContent;});'
+    + 'return mermaid.run({querySelector:".mermaid"});'
+    + '}).then(function(){'
+    +   'document.querySelectorAll(".mermaid").forEach(function(el){el.setAttribute("data-mermaid-done","1");});'
+    + '}).catch(function(){window.__mermaidFallback&&window.__mermaidFallback();});';
+  document.body.appendChild(s);
+  setTimeout(fallback, 8000);
+})();
+</script>
+</body>
+</html>

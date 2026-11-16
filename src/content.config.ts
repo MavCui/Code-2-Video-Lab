@@ -178,4 +178,26 @@ const practice = defineCollection({
   }),
 });
 
-export const collections = { projects, cases, works, studies, practice };
+const reports = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/reports' }),
+  schema: z.object({
+    num: z.string(),
+    slug: z.string(),
+    status: z.enum(['draft', 'published']),
+    title: z.string(),
+    subtitle: z.string().optional(),
+    one_liner: z.string(),
+    industry: z.string(),
+    cover: z.object({ file: z.string(), alt: z.string() }).optional(),
+    summary: z.string(),
+    file: z.string(),
+    sections: z.array(z.string()),
+    key_points: z.array(z.object({ k: z.string(), v: z.string() })),
+    basis: z.string(),
+    updated_at: z.string(),
+    verification_note: z.string(),
+    sort_weight: z.number().optional(),
+  }),
+});
+
+export const collections = { projects, cases, works, studies, practice, reports };

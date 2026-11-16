@@ -291,3 +291,11 @@ html[lang="en"] .stat .en { display: inline; }
 .evidence-col h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .evidence-col ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
 .evidence-col li { margin-bottom: 6px; }
+
+/* 研究报告：整页嵌入 */
+.report-embed { padding-top: 4px; }
+.report-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.report-hint { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.report-frame { display: block; width: 100%; height: min(86vh, 900px); border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.report-toc { margin: 0; padding-left: 22px; color: var(--ink-2); font-size: 14px; }
+.report-toc li { margin-bottom: 6px; }

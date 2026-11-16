@@ -1,0 +1,222 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('practice');
+  return all
+    .filter((p) => p.data.status === 'published')
+    .map((p) => ({ params: { slug: p.data.slug }, props: { entry: p } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const all = await getCollection('practice');
+const nameBySlug = Object.fromEntries(
+  all.filter((p) => p.data.status === 'published').map((p) => [p.data.slug, p.data.title])
+);
+const hasCost = (d.cost_table ?? []).length > 0;
+const head = d.cost_table?.[0] ?? [];
+---
+
+<Base title={d.title} description={d.one_liner}>
+  <main class="wrap detail">
+    <a class="back" id="back-link" href="/">← 返回项目展厅</a>
+
+    <section class="detail-head">
+      <div class="case-num">落地案例 {d.num} / 10 · {d.org}</div>
+      <h1>{d.title}</h1>
+      {d.subtitle && <p class="sub">{d.subtitle}</p>}
+      <p class="one">{d.one_liner}</p>
+      <div class="tag-rows">
+        <div class="tag-row">
+          <span class="label">行业</span>
+          <span class="card-tags"><span class="tag accent">{d.industry}</span></span>
+        </div>
+        <div class="tag-row">
+          <span class="label">技术栈</span>
+          <span class="card-tags">{(d.tech ?? []).map((t) => <span class="tag">{t}</span>)}</span>
+        </div>
+        <div class="tag-row">
+          <span class="label">内容类型</span>
+          <span class="card-tags"><span class="tag">线上生产案例</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="media-main">
+      {d.preview_motion ? (
+        <video
+          class="detail-media-video"
+          src={d.preview_motion}
+          poster={d.cover?.file}
+          autoplay muted loop playsinline preload="metadata"
+          aria-label={`${d.title} 动态预览`}
+        ></video>
+      ) : (
+        <img class:list={['detail-media-img', d.cover?.fit === 'contain' && 'fit-contain']} src={d.cover?.file} alt={d.cover?.alt ?? ''} />
+      )}
+      <div class="media-caption">
+        <strong>{d.title}</strong> · {d.preview_motion ? '公开片段（静音循环）' : d.media_records?.[0]?.kind} · {d.org} 官方素材，非本站复现
+      </div>
+    </section>
+
+    <nav class="outlinks" aria-label="外部来源">
+      {d.links?.demo && (
+        <a class:list={['outlink', 'primary', d.demo_note && 'is-broken']} href={d.links.demo} target="_blank" rel="noopener noreferrer">
+          观看成片 ↗{d.demo_note && '（当前不可访问）'}
+        </a>
+      )}
+      {d.links?.repo && <a class="outlink" href={d.links.repo} target="_blank" rel="noopener noreferrer">工程 / 源码 ↗</a>}
+      {d.links?.doc && <a class="outlink" href={d.links.doc} target="_blank" rel="noopener noreferrer">制作记录 ↗</a>}
+      {d.links?.cost && <a class="outlink" href={d.links.cost} target="_blank" rel="noopener noreferrer">账单文件 ↗</a>}
+    </nav>
+
+    {d.demo_note && <p class="demo-warning"><strong>链接状态</strong>：{d.demo_note}</p>}
+
+    <section class="section">
+      <h2>这条片子是什么</h2>
+      <p>{d.summary}</p>
+    </section>
+
+    <section class="section">
+      <h2>亮点</h2>
+      <ul>{(d.highlights ?? []).map((h) => <li>{h}</li>)}</ul>
+    </section>
+
+    <section class="section">
+      <h2>链路与披露程度</h2>
+      <div class="scroll">
+        <table class="registry">
+          <tbody>
+            {(d.meta ?? []).map((m) => (
+              <tr><th>{m.k}</th><td>{m.v}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {hasCost && (
+      <section class="section">
+        <h2>公开的成本口径</h2>
+        <div class="scroll">
+          <table class="cost-table">
+            <thead><tr>{head.map((c) => <th>{c}</th>)}</tr></thead>
+            <tbody>
+              {(d.cost_table ?? []).slice(1).map((row) => (
+                <tr>{row.map((c, i) => (i === 0 ? <th class="rowhead">{c}</th> : <td>{c}</td>))}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {d.cost_note && <p class="cost-note">{d.cost_note}</p>}
+      </section>
+    )}
+
+    <section class="section">
+      <h2>可复用点与适用边界</h2>
+      <div class="take-grid">
+        {(d.take ?? []).map((t) => (
+          <div class="take-item">
+            <div class="take-k">{t.k}</div>
+            <p>{t.v}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>证据：已知与缺口</h2>
+      <div class="evidence-grid">
+        <div class="evidence-col">
+          <h3>可以核对的</h3>
+          <ul>{(d.evidence_known ?? []).map((x) => <li>{x}</li>)}</ul>
+        </div>
+        <div class="evidence-col">
+          <h3>尚未说明的</h3>
+          <ul>{(d.evidence_gaps ?? []).map((x) => <li>{x}</li>)}</ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>使用边界</h2>
+      <ul>
+        <li>本文的工时、成本、credits 等数字均为作者或公司自述，本站未复现任何一条产线。</li>
+        <li>不同案例的任务、交付形态与计价口径不同，数字不可跨案例相除或排名。</li>
+        <li>画面版权归原作者或公司；本地副本仅供展示台引用，公开托管或商用前需单独确认。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>媒体与许可登记</h2>
+      <p style="font-size:13px;color:var(--muted)">作品许可与预览媒体使用依据分开登记；后者不由前者推导。</p>
+      <div class="scroll">
+        <table class="registry">
+          <thead><tr class="group"><th colspan="2">作品许可（公司/作者保留权利）</th></tr></thead>
+          <tbody>
+            <tr><th>SPDX</th><td>{d.license?.spdx}</td></tr>
+            <tr><th>许可 / 说明来源</th><td><a href={d.license?.source} target="_blank" rel="noopener noreferrer">{d.license?.source}</a></td></tr>
+            <tr><th>覆盖说明</th><td>{d.license?.note}</td></tr>
+          </tbody>
+          <thead><tr class="group"><th colspan="2">预览媒体使用依据（逐条单独登记）</th></tr></thead>
+          <tbody>
+            {(d.media_records ?? []).map((m) => (
+              <>
+                <tr><th>素材</th><td><strong>{m.sample_name}</strong> · {m.kind} · <a href={m.file} target="_blank" rel="noopener noreferrer">{m.file}</a></td></tr>
+                <tr><th>权利方 / 署名</th><td>{m.rights_holder} · {m.attribution}</td></tr>
+                <tr><th>使用依据</th><td>{m.usage_basis}</td></tr>
+                <tr><th>来源</th><td><a href={m.source_page} target="_blank" rel="noopener noreferrer">{m.source_page}</a></td></tr>
+                <tr><th>备注</th><td>{m.permission_note ?? '—'}</td></tr>
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>来源与更新时间</h2>
+      <div class="facts">
+        <div class="fact"><span class="k">公司 / 团队</span><span class="v">{d.org}</span></div>
+        <div class="fact"><span class="k">披露程度</span><span class="v">{(d.meta ?? []).find((m) => m.k === '披露程度')?.v}</span></div>
+        <div class="fact"><span class="k">本站更新日期</span><span class="v">{d.updated_at}</span></div>
+        <div class="fact"><span class="k">来源核验说明</span><span class="v">{d.verification_note}</span></div>
+      </div>
+    </section>
+
+    {(d.related ?? []).length > 0 && (
+      <section class="section">
+        <h2>相关落地案例</h2>
+        <div class="related">{(d.related ?? []).map((r) => <a href={`/practice/${r}/`}>{nameBySlug[r] ?? r} ↗</a>)}</div>
+      </section>
+    )}
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+  document.querySelectorAll('.detail-media-img, .detail-media-video').forEach(function (el) {
+    el.addEventListener('error', function () {
+      var cap = document.createElement('div');
+      cap.className = 'media-caption';
+      cap.textContent = '预览加载失败，请通过上方来源链接访问原始画面。';
+      el.replaceWith(cap);
+    });
+  });
+})();
+</script>

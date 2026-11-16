@@ -8,6 +8,7 @@ const projects = (await getCollection('projects')).filter((p) => p.data.status =
 const cases = (await getCollection('cases')).filter((c) => c.data.status === 'published');
 const works = (await getCollection('works')).filter((w) => w.data.status === 'published');
 const studies = (await getCollection('studies')).filter((s) => s.data.status === 'published');
+const practice = (await getCollection('practice')).filter((p) => p.data.status === 'published');
 
 const entries = [
   ...projects.map((p) => ({
@@ -67,6 +68,21 @@ const entries = [
     fit: s.data.cover?.fit ?? 'cover',
     weight: s.data.sort_weight ?? 9999,
   })),
+  ...practice.map((p) => ({
+    kind: 'practice' as const,
+    href: `/practice/${p.data.slug}/`,
+    title: p.data.title,
+    subtitle: p.data.org,
+    oneLiner: p.data.one_liner ?? '',
+    tags: [p.data.industry, ...(p.data.tech ?? []).slice(0, 2)],
+    cover: p.data.cover?.file ?? '',
+    alt: p.data.cover?.alt ?? '',
+    industry: p.data.industry,
+    tech: p.data.tech ?? [],
+    motion: p.data.preview_motion ?? null,
+    fit: p.data.cover?.fit ?? 'cover',
+    weight: p.data.sort_weight ?? 9999,
+  })),
 ].sort((a, b) => a.weight - b.weight);
 
 const techUsed = taxonomy.techTags.filter((t) => entries.some((e) => e.tech.includes(t)));
@@ -75,7 +91,7 @@ const techUsed = taxonomy.techTags.filter((t) => entries.some((e) => e.tech.incl
   <main class="wrap">
     <section class="hero">
       <h1>用代码，创造画面</h1>
-      <p>{projects.length} 个代码视频项目、{cases.length} 个单文件网页案例、{works.length} 个 AI 创作作品与 {studies.length} 篇带成本口径的案例精读。按行业浏览，用技术栈筛选，再回到原始来源。</p>
+      <p>{projects.length} 个代码视频项目、{cases.length} 个单文件网页案例、{works.length} 个 AI 创作作品、{studies.length} 篇带成本口径的案例精读，以及 {practice.length} 个公司线上生产案例。按行业浏览，用技术栈筛选，再回到原始来源。</p>
     </section>
 
     <section class="toolbar">
@@ -98,6 +114,7 @@ const techUsed = taxonomy.techTags.filter((t) => entries.some((e) => e.tech.incl
           <button class="chip" type="button" data-kind="case" aria-pressed="false">网页案例</button>
           <button class="chip" type="button" data-kind="work" aria-pressed="false">创作作品</button>
           <button class="chip" type="button" data-kind="study" aria-pressed="false">精读</button>
+          <button class="chip" type="button" data-kind="practice" aria-pressed="false">落地案例</button>
         </div>
       </div>
       <div class="filter-row">

@@ -1,6 +1,6 @@
 # Code-2-Video-Lab
 
-> A developer-facing showcase for code-generated visuals: 167 entries, 231 real preview assets, every one traceable to its source.
+> A developer-facing showcase for code-generated visuals: 177 entries, 243 real preview assets, every one traceable to its source.
 
 [中文](README.md) | **English**
 
@@ -26,12 +26,13 @@ The reason to build it: this field is extremely fragmented, and **claims are mix
 | Web cases | 100 | Single-file HTML pages, showing how far code alone can push visuals | 案例 |
 | AI works | 31 | AI-made videos with author-disclosed production details and comparison demos | 作品 |
 | Case studies | 24 | Deep reads with cost, duration, and token accounting, including evidence gaps | 精读 |
+| Production cases | 10 | Shipped work from companies: HeyGen, Digital Samba, Sublevel, GitHub Unwrapped and more | 落地 |
 
-**167 entries, 231 preview assets**, of which **57 are auto-playing clips**.
+**177 entries, 243 preview assets**, of which **59 are auto-playing clips**.
 
-**Nine industries** form the primary classification: brand & marketing, art & experiment, games & interaction, data & tools, education, media & publishing, life & consumer, space & architecture, research & models.
+**Nine industries** form the primary classification: art & experiment 54, brand & marketing 28, games & interaction 22, education 19, data & tools 19, media & publishing 15, space & architecture 11, life & consumer 7, research & models 2.
 **Tech stack is a separate tag dimension**: Canvas 2D, SVG, WebGL, Three.js, Remotion, HyperFrames, Blender, Manim, MCP, After Effects, plus Claude Opus 5.5 / Fable 5.5 / Fable 5.2.
-**Type is its own filter**: want only the ones that show a bill? Click 精读 and you get 24.
+**Type is its own filter**: want only the ones that show a bill? Click 精读 and you get 24; want company production cases, click 落地案例.
 
 ## Three ways to use it
 
@@ -100,11 +101,12 @@ src/
     cases/       100 single-file web cases
     works/       31 AI-made works
     studies/     24 case studies
+    practice/    10 company production cases
   pages/         showcase, four detail templates, about
   components/    shared card
   data/          taxonomy.json — industries, tech tags, types
   styles/        global.css
-public/media/    231 preview assets (stills + preview.mp4)
+public/media/    243 preview assets (stills + preview.mp4)
 scripts/         validate.mjs (gate), build.mjs (build wrapper)
 docs/            release checklist, page acceptance list, sourcing notes, media registry
 data/            internal verification ledger (not used by the site)
@@ -146,7 +148,7 @@ That workflow is itself the filter: if you cannot get a real preview or explain 
 - **Chinese first.** The UI and all entries are in Chinese; English exists in this README and `docs/INTRO.en.md`.
 - **No automation.** No crawler, no scheduled job. Content is maintained by hand; the last pass was 2026-11-16.
 - **Previews are citations, not reproductions.** Every frame comes from the original author or official assets. No pipeline here has ever been run by us.
-- **Media permissions are pending.** The 231 assets are registered as introductory citation with attribution and a backlink; public commercial redistribution needs per-item confirmation from rights holders.
+- **Media permissions are pending.** The 243 assets are registered as introductory citation with attribution and a backlink; public commercial redistribution needs per-item confirmation from rights holders.
 - **One dead link.** The original post for case study #12 is gone (404), and the page says so.
 
 ## License and credits

@@ -66,10 +66,10 @@ The credibility of a content site depends on whether it holds the line when nobo
 
 | | |
 |---|---|
-| Entries | 167 (12 projects + 100 web cases + 31 works + 24 studies) |
-| Preview assets | 231 (174 stills + 57 motion clips) |
+| Entries | 177 (12 projects + 100 web cases + 31 works + 24 studies + 10 production cases) |
+| Preview assets | 243 (184 stills + 59 motion clips) |
 | Industries | 9 |
-| Tech tags | 33 |
+| Tech tags | 44 |
 | Build gate | 4 blocking categories + 1 manual-review category |
 
 ## What's next

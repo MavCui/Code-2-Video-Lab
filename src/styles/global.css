@@ -283,3 +283,11 @@ html[lang="en"] .stat .en { display: inline; }
 .about-body ul { margin: 0 0 12px; padding-left: 20px; color: var(--ink-2); }
 .about-body li { margin-bottom: 7px; }
 .about-body a { color: var(--accent); }
+
+/* 落地案例：证据两栏 */
+.evidence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 720px) { .evidence-grid { grid-template-columns: 1fr; } }
+.evidence-col { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 13px 15px; }
+.evidence-col h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.evidence-col ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
+.evidence-col li { margin-bottom: 6px; }

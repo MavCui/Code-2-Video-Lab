@@ -274,6 +274,57 @@ for (const s of studiesPublished) {
 }
 
 /* ---------- 外链探测 ---------- */
+/* ---------- 落地案例 ---------- */
+const practiceDir = path.join(root, 'src/content/practice');
+const practiceFiles = fs.existsSync(practiceDir) ? fs.readdirSync(practiceDir).filter((f) => f.endsWith('.md')).sort() : [];
+const practices = practiceFiles.map((file) => ({ file, data: matter(fs.readFileSync(path.join(practiceDir, file), 'utf8')).data }));
+const practicePublished = practices.filter((p) => p.data.status === 'published');
+const practiceSlugs = new Set(practicePublished.map((p) => p.data.slug));
+
+for (const p of practicePublished) {
+  const d = p.data;
+  for (const k of ['num', 'slug', 'title', 'org', 'one_liner', 'industry', 'summary', 'updated_at', 'verification_note']) {
+    if (!has(d[k])) err(p.file, `落地案例缺少内部字段 ${k}`);
+  }
+  if (has(d.industry) && !categoryLabels.includes(d.industry)) err(p.file, `行业「${d.industry}」不在行业词表内`);
+  const tech = d.tech ?? [];
+  if (!tech.length) err(p.file, '落地案例至少需要一个技术栈标签');
+  for (const t of tech) if (!taxonomy.techTags.includes(t)) err(p.file, `技术栈标签「${t}」不在词表内`);
+  if (!has(d.cover?.file) || !has(d.cover?.alt)) err(p.file, '封面与替代文字必须填写');
+  if (has(d.cover?.file)) {
+    const fp = abs(d.cover.file);
+    if (!fs.existsSync(fp)) err(p.file, `封面不存在：${d.cover.file}`);
+    else if (fs.statSync(fp).size === 0) err(p.file, `封面为空：${d.cover.file}`);
+    else assetCount++;
+  }
+  if (String(d.summary ?? '').replace(/\s/g, '').length < 40) err(p.file, '案例说明过短（少于 40 字）');
+  if (!(d.highlights ?? []).length) err(p.file, '亮点不能为空');
+  if ((d.meta ?? []).length < 4) err(p.file, '链路拆解（meta）至少需要 4 行');
+  if (!(d.evidence_known ?? []).length) err(p.file, '已披露内容（evidence_known）不能为空');
+  if (!(d.evidence_gaps ?? []).length) err(p.file, '证据缺口（evidence_gaps）不能为空');
+  if ((d.take ?? []).length < 3) err(p.file, '可复用点需要三行（可以迁移 / 成立条件 / 不能外推）');
+
+  const links = Object.entries(d.links ?? {}).filter(([, v]) => has(v));
+  if (!links.length) err(p.file, '至少需要一个外部入口');
+  for (const [k, v] of links) {
+    if (!/^https?:\/\//.test(v)) err(p.file, `外链 ${k} 不是合法 http(s) 地址`);
+    linkTargets.push({ project: d.title, url: v, use: `外部入口：${k}` });
+  }
+
+  const recs = d.media_records ?? [];
+  checkRecords(p.file, recs, d.cover?.file, '落地案例', d.title);
+  checkMotion(p.file, d, '落地案例');
+
+  if (!has(d.license?.spdx) || !has(d.license?.source) || !has(d.license?.note)) err(p.file, '作品许可必须登记 spdx / source / note');
+  else if (!/不推断|不覆盖|单独确认/.test(d.license.note)) err(p.file, '作品许可说明必须明确不推断媒体权限');
+  if (has(d.license?.source)) linkTargets.push({ project: d.title, url: d.license.source, use: '作品许可来源' });
+
+  for (const r of d.related ?? []) {
+    if (r === d.slug) err(p.file, '相关落地案例不能指向自身');
+    else if (!practiceSlugs.has(r)) err(p.file, `相关落地案例不存在或未发布：${r}`);
+  }
+}
+
 const uniqueTargets = [...new Map(linkTargets.map((x) => [x.url, x])).values()];
 
 async function probe(target) {
@@ -355,6 +406,7 @@ const summary = [
   `- 网页案例：${cases.length}（published ${casesPublished.length}）`,
   `- 创作案例：${works.length}（published ${worksPublished.length}）`,
   `- 案例精读：${studies.length}（published ${studiesPublished.length}）`,
+  `- 落地案例：${practices.length}（published ${practicePublished.length}）`,
   `- 动态预览：${motionCount} 段（5 秒静音循环，逐条登记来源）`,
   `- 资产检查：${assetCount} 项通过`,
   `- 阻断级错误：${errors.length}`,
@@ -373,5 +425,5 @@ if (errors.length) {
 if (reviews.length) console.log(`[人工复核] 确认异常 ${reviews.length} 个、待人工确认 ${undetermined.length} 个，已写入 reports/外链人工复核.md（不阻断发布）`);
 else if (undetermined.length) console.log(`[人工复核] 待人工确认 ${undetermined.length} 个（本环境不可判定），已写入 reports/外链人工复核.md（不阻断发布）`);
 console.log(
-  `[校验] published ${published.length} 项目 + ${casesPublished.length} 案例 + ${worksPublished.length} 创作案例 + ${studiesPublished.length} 精读 / 动态预览 ${motionCount} / draft ${drafts.length} / 资产 ${assetCount} / 阻断 ${errors.length} / 复核 ${reviews.length} / 待确认 ${undetermined.length}`
+  `[校验] published ${published.length} 项目 + ${casesPublished.length} 案例 + ${worksPublished.length} 创作案例 + ${studiesPublished.length} 精读 + ${practicePublished.length} 落地 / 动态预览 ${motionCount} / draft ${drafts.length} / 资产 ${assetCount} / 阻断 ${errors.length} / 复核 ${reviews.length} / 待确认 ${undetermined.length}`
 );

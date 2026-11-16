@@ -145,4 +145,37 @@ const studies = defineCollection({
   }),
 });
 
-export const collections = { projects, cases, works, studies };
+const practice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/practice' }),
+  schema: z.object({
+    num: z.string(),
+    slug: z.string(),
+    status: z.enum(['draft', 'published']),
+    title: z.string(),
+    subtitle: z.string().optional(),
+    org: z.string(),
+    one_liner: z.string(),
+    industry: z.string(),
+    tech: z.array(z.string()),
+    cover: z.object({ file: z.string(), alt: z.string(), fit: z.enum(['cover', 'contain']).optional() }).optional(),
+    preview_motion: z.string().nullable().optional(),
+    summary: z.string(),
+    highlights: z.array(z.string()),
+    meta: z.array(z.object({ k: z.string(), v: z.string() })),
+    links: z.object({ demo: z.string().optional(), repo: z.string().optional(), doc: z.string().optional(), cost: z.string().optional() }),
+    demo_note: z.string().optional(),
+    evidence_known: z.array(z.string()),
+    evidence_gaps: z.array(z.string()),
+    take: z.array(z.object({ k: z.string(), v: z.string() })),
+    cost_table: z.array(z.array(z.string())).optional(),
+    cost_note: z.string().optional(),
+    license: z.object({ spdx: z.string(), source: z.string(), note: z.string() }),
+    media_records: z.array(mediaRecord),
+    updated_at: z.string(),
+    verification_note: z.string(),
+    related: z.array(z.string()).optional(),
+    sort_weight: z.number().optional(),
+  }),
+});
+
+export const collections = { projects, cases, works, studies, practice };

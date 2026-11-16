@@ -4,6 +4,8 @@
 
 **中文** | [English](README.en.md)
 
+**在线预览**：<https://mavcui.github.io/Code-2-Video-Lab/>　|　**仓库**：<https://github.com/MavCui/Code-2-Video-Lab>
+
 ![展厅首页](docs/images/home.jpg)
 
 ---
@@ -110,13 +112,25 @@ data/            核验条目底表（内部溯源，不参与页面逻辑）
 
 ## 部署
 
-仓库根目录就是 Astro 项目，Vercel 可直接识别：
+仓库根目录就是 Astro 项目，两条路都已经验证可行。
+
+**GitHub Pages（当前线上地址）**
+
+站点部署在 `<user>.github.io/<repo>/` 子路径下，需要给站内绝对路径加前缀。一条命令完成构建、改写与发布：
+
+```bash
+npm run deploy:gh
+```
+
+它等价于：`BASE_PATH=/Code-2-Video-Lab npm run build` → `node scripts/prefix-base.mjs` → 把 `dist/` 推到 `gh-pages` 分支。
+
+**Vercel（根路径，无需前缀）**
 
 ```bash
 npx vercel --prod
 ```
 
-或在 Vercel 导入仓库，Framework Preset 选 Astro，Build Command 用默认即可（`npm run build`）。
+或在 Vercel 导入仓库，Framework Preset 选 Astro，`vercel.json` 已指定 `buildCommand: npm run build:ci`（跳过外链探测）与 `outputDirectory: dist`，不需要再改配置。根路径部署时不要设置 `BASE_PATH`。
 
 ## 新增一个条目
 

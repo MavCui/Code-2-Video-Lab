@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "node scripts/validate.mjs",
     "check:links": "node scripts/validate.mjs --links",
-    "build:ci": "SKIP_LINK_PROBE=1 node scripts/build.mjs"
+    "build:ci": "SKIP_LINK_PROBE=1 node scripts/build.mjs",
+    "deploy:gh": "sh scripts/deploy-gh.sh"
   },
   "dependencies": {
     "astro": "^5.16.0",

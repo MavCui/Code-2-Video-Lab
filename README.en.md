@@ -4,6 +4,8 @@
 
 [中文](README.md) | **English**
 
+**Live**: <https://mavcui.github.io/Code-2-Video-Lab/>　|　**Repo**: <https://github.com/MavCui/Code-2-Video-Lab>
+
 ![Showcase home](docs/images/home.jpg)
 
 ---
@@ -110,13 +112,25 @@ data/            internal verification ledger (not used by the site)
 
 ## Deploy
 
-The repo root is the Astro project, so Vercel detects it directly:
+The repo root is the Astro project. Two routes, both verified.
+
+**GitHub Pages (the current live site)**
+
+Project sites are served under `<user>.github.io/<repo>/`, so root-absolute paths need a prefix. One command handles build, rewrite, and push:
+
+```bash
+npm run deploy:gh
+```
+
+It is equivalent to `BASE_PATH=/Code-2-Video-Lab npm run build` → `node scripts/prefix-base.mjs` → push `dist/` to the `gh-pages` branch.
+
+**Vercel (served at the root, no prefix)**
 
 ```bash
 npx vercel --prod
 ```
 
-Or import the repo in Vercel, pick the Astro preset, and keep the default build command (`npm run build`).
+Or import the repo and pick the Astro preset — `vercel.json` already sets `buildCommand: npm run build:ci` (skips link probing) and `outputDirectory: dist`. Do not set `BASE_PATH` for a root deployment.
 
 ## Adding an entry
 

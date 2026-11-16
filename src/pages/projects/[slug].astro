@@ -1,0 +1,183 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('projects');
+  return all
+    .filter((p) => p.data.status === 'published')
+    .map((p) => ({ params: { slug: p.data.slug }, props: { entry: p } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const nameBySlug = Object.fromEntries(
+  (await getCollection('projects'))
+    .filter((p) => p.data.status === 'published')
+    .map((p) => [p.data.slug, p.data.name])
+);
+
+const linkDefs = [
+  { key: 'website', label: '项目官网', primary: true },
+  { key: 'post', label: '原始帖子', primary: false },
+  { key: 'github', label: 'GitHub', primary: false },
+  { key: 'paper', label: '论文', primary: false },
+  { key: 'demo', label: '在线 Demo', primary: false },
+];
+const linksMap = (d.links ?? {}) as Record<string, string | undefined>;
+const outlinks = linkDefs
+  .filter((l) => linksMap[l.key])
+  .map((l) => ({ label: l.label, url: linksMap[l.key] as string, primary: l.primary }));
+
+const extraMedia = (d.media_records ?? []).filter((m) => m.file !== d.cover?.file);
+const tagRows = [
+  { label: '应用场景', values: d.tags?.scenario ?? [] },
+  { label: '技术路线', values: d.tags?.tech ?? [] },
+  { label: '项目类型', values: d.tags?.type ?? [] },
+  { label: '内容状态', values: d.tags?.media_status ?? [] },
+].filter((r) => r.values.length > 0);
+---
+<Base title={d.name} description={d.one_liner}>
+  <main class="wrap detail">
+    <a class="back" id="back-link" href="/">← 返回项目展厅</a>
+
+    <section class="detail-head">
+      <h1>{d.name}</h1>
+      {d.subtitle && <p class="sub">{d.subtitle}</p>}
+      <p class="one">{d.one_liner}</p>
+      <div class="tag-rows">
+        {tagRows.map((r) => (
+          <div class="tag-row">
+            <span class="label">{r.label}</span>
+            <span class="card-tags">{r.values.map((v) => <span class="tag">{v}</span>)}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="media-main">
+      {d.preview_motion ? (
+        <video
+          class="detail-media-video"
+          src={d.preview_motion}
+          poster={d.cover?.file}
+          autoplay muted loop playsinline preload="metadata"
+          aria-label={d.cover?.alt ?? '官方动态预览'}
+        ></video>
+      ) : (
+        <img class="detail-media-img" src={d.cover?.file} alt={d.cover?.alt ?? ''} />
+      )}
+      <div class="media-caption">
+        <strong>{d.media_records?.[0]?.sample_name ?? '预览画面'}</strong>
+        · {d.media_records?.[0]?.kind ?? '官方素材'} · {d.media_records?.[0]?.attribution ?? ''}
+        {d.preview_motion ? '· 动态预览为静音循环片段，非本站复现' : '（非本站复现，未标注为实测效果）'}
+      </div>
+    </section>
+    {extraMedia.length > 0 && (
+      <div class="media-extra">
+        {extraMedia.map((m) => (
+          <figure>
+            <img class="detail-media-img" src={m.file} alt={m.sample_name} loading="lazy" />
+            <figcaption><strong>{m.sample_name}</strong>{m.kind} · {m.attribution}</figcaption>
+          </figure>
+        ))}
+      </div>
+    )}
+
+    {outlinks.length > 0 && (
+      <nav class="outlinks" aria-label="外部来源">
+        {outlinks.map((l) => (
+          <a class:list={['outlink', l.primary && 'primary']} href={l.url} target="_blank" rel="noopener noreferrer">{l.label} ↗</a>
+        ))}
+      </nav>
+    )}
+
+    <section class="section">
+      <h2>项目概览</h2>
+      <p>{d.overview}</p>
+    </section>
+
+    <section class="section">
+      <h2>方法与分析</h2>
+      <div class="prose"><Content /></div>
+    </section>
+
+    <section class="section">
+      <h2>限制与注意事项</h2>
+      <ul>{(d.limitations ?? []).map((l) => <li>{l}</li>)}</ul>
+    </section>
+
+    <section class="section">
+      <h2>媒体与许可登记</h2>
+      <p style="font-size:13px;color:var(--muted)">代码许可与预览媒体使用依据分开登记；后者不由前者推导。</p>
+      <div class="scroll">
+        <table class="registry">
+          <thead><tr class="group"><th colspan="2">代码许可（仅覆盖仓库代码）</th></tr></thead>
+          <tbody>
+            <tr><th>SPDX</th><td>{d.code_license?.spdx}</td></tr>
+            <tr><th>许可 / 说明来源</th><td><a href={d.code_license?.source} target="_blank" rel="noopener noreferrer">{d.code_license?.source}</a></td></tr>
+            <tr><th>覆盖说明</th><td>{d.code_license?.note}</td></tr>
+          </tbody>
+          <thead><tr class="group"><th colspan="2">预览媒体使用依据（逐条单独登记）</th></tr></thead>
+          <tbody>
+            {(d.media_records ?? []).map((m) => (
+              <>
+                <tr><th>素材</th><td><strong>{m.sample_name}</strong> · {m.kind} · <a href={m.file} target="_blank" rel="noopener noreferrer">{m.file}</a></td></tr>
+                <tr><th>权利方 / 署名</th><td>{m.rights_holder} · {m.attribution}</td></tr>
+                <tr><th>使用依据</th><td>{m.usage_basis}</td></tr>
+                <tr><th>来源</th><td><a href={m.source_url} target="_blank" rel="noopener noreferrer">{m.source_url}</a>{m.source_page && <> · <a href={m.source_page} target="_blank" rel="noopener noreferrer">来源页面</a></>}</td></tr>
+                <tr><th>备注</th><td>{m.permission_note ?? '—'}</td></tr>
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>来源与更新时间</h2>
+      <div class="facts">
+        <div class="fact"><span class="k">作者 / 团队</span><span class="v">{d.author}</span></div>
+        {d.published_at && <div class="fact"><span class="k">项目发布日期</span><span class="v">{d.published_at}</span></div>}
+        <div class="fact"><span class="k">本站更新日期</span><span class="v">{d.updated_at}</span></div>
+        <div class="fact"><span class="k">来源核验说明</span><span class="v">{d.verification_note}</span></div>
+        <div class="fact"><span class="k">原始来源</span><span class="v">{d.source_note}</span></div>
+        <div class="fact"><span class="k">收录理由</span><span class="v">{d.selection_note}</span></div>
+      </div>
+    </section>
+
+    {(d.related ?? []).length > 0 && (
+      <section class="section">
+        <h2>相关项目</h2>
+        <div class="related">{d.related!.map((r) => <a href={`/projects/${r}/`}>{nameBySlug[r] ?? r} ↗</a>)}</div>
+      </section>
+    )}
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+  document.querySelectorAll('.detail-media-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      var cap = document.createElement('div');
+      cap.className = 'media-caption';
+      cap.textContent = '预览加载失败，请通过上方外部来源按钮访问原始页面。';
+      img.replaceWith(cap);
+    });
+  });
+})();
+</script>

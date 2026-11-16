@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { project: CollectionEntry<'projects'>; }
+const { project } = Astro.props;
+const d = project.data;
+const searchText = [d.name, d.subtitle ?? '', d.one_liner ?? '', ...(d.card_tags ?? []), ...(d.tags?.scenario ?? [])].join(' ').toLowerCase();
+---
+<a
+  class="card project-card"
+  href={`/projects/${d.slug}/`}
+  data-category={d.primary_category}
+  data-search={searchText}
+  data-motion={d.preview_motion || undefined}
+>
+  <div class="card-media">
+    <img class="media-img" src={d.cover?.file} alt={d.cover?.alt ?? ''} loading="lazy" />
+    <div class="card-fallback">预览暂不可用 · 点击进入详情查看原始来源</div>
+  </div>
+  <div class="card-body">
+    <h2 class="card-title">{d.name}</h2>
+    {d.subtitle && <p class="card-sub">{d.subtitle}</p>}
+    <p class="card-one">{d.one_liner}</p>
+    <div class="card-tags">
+      {(d.card_tags ?? []).map((t, i) => <span class:list={['tag', i === 0 && 'accent']}>{t}</span>)}
+    </div>
+  </div>
+</a>

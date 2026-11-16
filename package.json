@@ -1,0 +1,19 @@
+{
+  "name": "code-2-video-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/build.mjs",
+    "preview": "astro preview",
+    "check": "node scripts/validate.mjs",
+    "check:links": "node scripts/validate.mjs --links",
+    "build:ci": "SKIP_LINK_PROBE=1 node scripts/build.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.16.0",
+    "gray-matter": "^4.0.3"
+  },
+  "description": "A showcase for code-generated video and visuals: 167 entries, 231 preview assets, every one traceable."
+}

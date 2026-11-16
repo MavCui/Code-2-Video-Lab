@@ -1,0 +1,23 @@
+{
+  "industries": [
+    { "id": "brand", "label": "品牌与营销", "desc": "落地页、产品页、品牌站与活动海报" },
+    { "id": "art", "label": "艺术与实验", "desc": "生成艺术、程序化视觉、材质与字体实验" },
+    { "id": "game", "label": "游戏与互动", "desc": "游戏、玩具、乐器与可玩模拟" },
+    { "id": "data", "label": "数据与工具", "desc": "仪表盘、可视化、编辑器与开发工具" },
+    { "id": "edu", "label": "教育与科普", "desc": "解释性页面、科学可视化、课程与科普" },
+    { "id": "media", "label": "媒体与出版", "desc": "杂志、长文、绘本、影像与叙事" },
+    { "id": "life", "label": "生活与消费", "desc": "食品、家居、香氛、健康与个人用品" },
+    { "id": "space", "label": "空间与建筑", "desc": "建筑、室内、地图与场景复原" },
+    { "id": "research", "label": "研究与模型", "desc": "模型、论文与实验性研究工程" }
+  ],
+  "techTags": [
+    "Canvas 2D", "SVG", "CSS 3D", "WebGL", "Web Audio", "DOM / CSS", "原生 JS",
+    "React", "HTML", "CSS", "GSAP", "Lottie", "WAAPI", "Three.js",
+    "Manim", "Rust", "FFmpeg", "Blender", "3D", "物理仿真",
+    "Claude Opus 5.5", "Claude Fable 5.5", "Claude Fable 5.2",
+    "Remotion", "HyperFrames", "After Effects", "MCP", "Suno",
+    "视频模型", "多智能体", "代码渲染", "Gemini TTS"
+  ],
+  "typeTags": ["Agent", "框架", "模型", "工作流", "作品", "网页案例"],
+  "mediaStatus": ["官方样片", "官方文档截图", "官方截图", "作者演示", "本站复现"]
+}

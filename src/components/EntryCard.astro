@@ -1,0 +1,44 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  subtitle?: string;
+  oneLiner: string;
+  tags: string[];
+  cover: string;
+  alt: string;
+  kind: 'project' | 'case' | 'work' | 'study';
+  industry: string;
+  tech: string[];
+  motion?: string | null;
+  fit?: 'cover' | 'contain';
+}
+const { href, title, subtitle, oneLiner, tags, cover, alt, kind, industry, tech, motion, fit } = Astro.props;
+const searchText = [title, subtitle ?? '', oneLiner, industry, ...tech, ...tags].join(' ').toLowerCase();
+const KIND_LABEL = { case: '案例', work: '作品', study: '精读' } as Record<string, string>;
+---
+<a
+  class="card entry-card"
+  href={href}
+  data-kind={kind}
+  data-industry={industry}
+  data-tech={tech.join('|')}
+  data-search={searchText}
+  data-motion={motion || undefined}
+>
+  <div class="card-media">
+    <img class:list={['media-img', fit === 'contain' && 'fit-contain']} src={cover} alt={alt} loading="lazy" />
+    {motion && <video class="card-video" src={motion} poster={cover} muted loop playsinline preload="none" aria-hidden="true"></video>}
+    <div class="card-fallback">预览暂不可用 · 点击进入详情查看原始来源</div>
+    {kind !== 'project' && <span class="kind-badge">{KIND_LABEL[kind] ?? ''}</span>}
+    {motion && <span class="motion-badge">▶ 动态</span>}
+  </div>
+  <div class="card-body">
+    <h2 class="card-title">{title}</h2>
+    {subtitle && <p class="card-sub">{subtitle}</p>}
+    <p class="card-one">{oneLiner}</p>
+    <div class="card-tags">
+      {(tags ?? []).slice(0, 3).map((t, i) => <span class:list={['tag', i === 0 && 'accent']}>{t}</span>)}
+    </div>
+  </div>
+</a>

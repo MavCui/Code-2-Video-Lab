@@ -1,0 +1,192 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('cases');
+  return all
+    .filter((c) => c.data.status === 'published')
+    .map((c) => ({ params: { slug: c.data.slug }, props: { entry: c } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const all = await getCollection('cases');
+const nameBySlug = Object.fromEntries(
+  all.filter((c) => c.data.status === 'published').map((c) => [c.data.slug, c.data.title_zh])
+);
+---
+<Base title={d.title_zh} description={d.one_liner}>
+  <main class="wrap detail">
+    <a class="back" id="back-link" href="/">← 返回项目展厅</a>
+
+    <section class="detail-head">
+      <div class="case-num">案例 {d.num} / 100</div>
+      <h1>{d.title_zh}</h1>
+      <p class="sub">{d.title_en}</p>
+      <p class="one">{d.one_liner}</p>
+      <div class="tag-rows">
+        <div class="tag-row">
+          <span class="label">行业</span>
+          <span class="card-tags"><span class="tag accent">{d.industry}</span></span>
+        </div>
+        <div class="tag-row">
+          <span class="label">技术栈</span>
+          <span class="card-tags">{(d.tech ?? []).map((t) => <span class="tag">{t}</span>)}</span>
+        </div>
+        <div class="tag-row">
+          <span class="label">内容类型</span>
+          <span class="card-tags"><span class="tag">单文件网页</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="media-main">
+      <img class="detail-media-img" src={d.thumb?.file} alt={d.thumb?.alt ?? ''} />
+      <div class="media-caption">
+        <strong>{d.title_zh} 首屏</strong> · 官方合集截图 · 非本站复现，未标注为实测效果
+      </div>
+    </section>
+
+    <section class="embed-block" id="embed-block">
+      <div class="embed-head">
+        <div>
+          <strong>这是可交互网页，不是一段录像</strong>
+          <p>点一下即可在站内直接运行；页面由原作者托管，本站不修改内容。</p>
+        </div>
+        <button class="embed-btn" type="button" id="embed-btn" data-src={d.source?.html}>▶ 在站内运行</button>
+      </div>
+      <div class="embed-frame" id="embed-frame" hidden></div>
+    </section>
+
+    <nav class="outlinks" aria-label="外部来源">
+      <a class="outlink primary" href={d.source?.html} target="_blank" rel="noopener noreferrer">打开案例 ↗</a>
+      <a class="outlink" href={d.source?.prompt} target="_blank" rel="noopener noreferrer">原始提示词 ↗</a>
+      <a class="outlink" href={d.source?.page} target="_blank" rel="noopener noreferrer">合集页 ↗</a>
+    </nav>
+
+    <section class="section">
+      <h2>案例说明</h2>
+      <p>{d.summary}</p>
+    </section>
+
+    <section class="section">
+      <h2>技术要点</h2>
+      <ul>{(d.tech_notes ?? []).map((n) => <li>{n}</li>)}</ul>
+    </section>
+
+    <section class="section">
+      <h2>使用边界</h2>
+      <ul>
+        <li>展示的是官方合集的首屏截图；本站未逐页运行交互，不提供实测结论。</li>
+        <li>页面中的品牌、人物与数据均由作者明确标注为虚构，不应作为真实信息引用。</li>
+        <li>页面代码与原始提示词的使用条件需单独确认；本地截图副本仅供展示台引用。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>媒体与许可登记</h2>
+      <p style="font-size:13px;color:var(--muted)">代码许可与预览媒体使用依据分开登记；后者不由前者推导。</p>
+      <div class="scroll">
+        <table class="registry">
+          <thead><tr class="group"><th colspan="2">代码许可（仅覆盖页面代码）</th></tr></thead>
+          <tbody>
+            <tr><th>SPDX</th><td>{d.license?.spdx}</td></tr>
+            <tr><th>许可 / 说明来源</th><td><a href={d.license?.source} target="_blank" rel="noopener noreferrer">{d.license?.source}</a></td></tr>
+            <tr><th>覆盖说明</th><td>{d.license?.note}</td></tr>
+          </tbody>
+          <thead><tr class="group"><th colspan="2">预览媒体使用依据（逐条单独登记）</th></tr></thead>
+          <tbody>
+            {(d.media_records ?? []).map((m) => (
+              <>
+                <tr><th>素材</th><td><strong>{m.sample_name}</strong> · {m.kind} · <a href={m.file} target="_blank" rel="noopener noreferrer">{m.file}</a></td></tr>
+                <tr><th>权利方 / 署名</th><td>{m.rights_holder} · {m.attribution}</td></tr>
+                <tr><th>使用依据</th><td>{m.usage_basis}</td></tr>
+                <tr><th>来源</th><td><a href={m.source_url} target="_blank" rel="noopener noreferrer">{m.source_url}</a>{m.source_page && <> · <a href={m.source_page} target="_blank" rel="noopener noreferrer">来源页面</a></>}</td></tr>
+                <tr><th>备注</th><td>{m.permission_note ?? '—'}</td></tr>
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>来源与更新时间</h2>
+      <div class="facts">
+        <div class="fact"><span class="k">作者 / 团队</span><span class="v">Mia AI Lab / 合集作者</span></div>
+        <div class="fact"><span class="k">本站更新日期</span><span class="v">{d.updated_at}</span></div>
+        <div class="fact"><span class="k">来源核验说明</span><span class="v">{d.verification_note}</span></div>
+        <div class="fact"><span class="k">原始来源</span><span class="v">Claude Opus 5.5 · 100 HTML Files 合集</span></div>
+      </div>
+    </section>
+
+    {(d.related ?? []).length > 0 && (
+      <section class="section">
+        <h2>相关案例</h2>
+        <div class="related">{(d.related ?? []).map((r) => <a href={`/cases/${r}/`}>{nameBySlug[r] ?? r} ↗</a>)}</div>
+      </section>
+    )}
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+  var btn = document.getElementById('embed-btn');
+  var box = document.getElementById('embed-frame');
+  if (btn && box) {
+    btn.addEventListener('click', function () {
+      var src = btn.getAttribute('data-src');
+      if (!src) return;
+      var frame = box.querySelector('iframe');
+      if (frame) {
+        frame.src = frame.getAttribute('src');
+        return;
+      }
+      frame = document.createElement('iframe');
+      frame.src = src;
+      frame.loading = 'lazy';
+      frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock');
+      frame.setAttribute('title', '案例运行画面');
+      frame.setAttribute('referrerpolicy', 'no-referrer');
+      box.appendChild(frame);
+      var bar = document.createElement('div');
+      bar.className = 'embed-bar';
+      var note = document.createElement('span');
+      note.textContent = '第三方内容 · 由原作者托管 · 本站不修改';
+      var open = document.createElement('a');
+      open.href = src;
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      open.textContent = '新标签打开 ↗';
+      bar.appendChild(note);
+      bar.appendChild(open);
+      box.appendChild(bar);
+      box.hidden = false;
+      btn.textContent = '↻ 重新载入';
+    });
+  }
+
+  document.querySelectorAll('.detail-media-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      var cap = document.createElement('div');
+      cap.className = 'media-caption';
+      cap.textContent = '预览加载失败，请通过上方按钮访问原始页面。';
+      img.replaceWith(cap);
+    });
+  });
+})();
+</script>

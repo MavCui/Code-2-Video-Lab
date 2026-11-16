@@ -1,0 +1,213 @@
+---
+import Base from '../layouts/Base.astro';
+import EntryCard from '../components/EntryCard.astro';
+import { getCollection } from 'astro:content';
+import taxonomy from '../data/taxonomy.json';
+
+const projects = (await getCollection('projects')).filter((p) => p.data.status === 'published');
+const cases = (await getCollection('cases')).filter((c) => c.data.status === 'published');
+const works = (await getCollection('works')).filter((w) => w.data.status === 'published');
+const studies = (await getCollection('studies')).filter((s) => s.data.status === 'published');
+
+const entries = [
+  ...projects.map((p) => ({
+    kind: 'project' as const,
+    href: `/projects/${p.data.slug}/`,
+    title: p.data.name,
+    subtitle: p.data.subtitle,
+    oneLiner: p.data.one_liner ?? '',
+    tags: p.data.card_tags ?? [],
+    cover: p.data.cover?.file ?? '',
+    alt: p.data.cover?.alt ?? '',
+    industry: p.data.primary_category ?? '',
+    tech: p.data.tags?.tech ?? [],
+    motion: p.data.preview_motion ?? null,
+    weight: p.data.sort_weight ?? 999,
+  })),
+  ...cases.map((c) => ({
+    kind: 'case' as const,
+    href: `/cases/${c.data.slug}/`,
+    title: c.data.title_zh,
+    subtitle: c.data.title_en,
+    oneLiner: c.data.one_liner ?? '',
+    tags: [...(c.data.tech ?? []).slice(0, 2), c.data.industry ?? ''],
+    cover: c.data.thumb?.file ?? '',
+    alt: c.data.thumb?.alt ?? '',
+    industry: c.data.industry ?? '',
+    tech: c.data.tech ?? [],
+    motion: null,
+    weight: c.data.sort_weight ?? 9999,
+  })),
+  ...works.map((w) => ({
+    kind: 'work' as const,
+    href: `/works/${w.data.slug}/`,
+    title: w.data.title_zh,
+    subtitle: w.data.author,
+    oneLiner: w.data.one_liner ?? '',
+    tags: [...(w.data.tech ?? []).slice(0, 2), w.data.industry ?? ''],
+    cover: w.data.cover?.file ?? '',
+    alt: w.data.cover?.alt ?? '',
+    industry: w.data.industry ?? '',
+    tech: w.data.tech ?? [],
+    motion: w.data.preview_motion ?? null,
+    weight: w.data.sort_weight ?? 9999,
+  })),
+  ...studies.map((s) => ({
+    kind: 'study' as const,
+    href: `/studies/${s.data.slug}/`,
+    title: s.data.title_main,
+    subtitle: s.data.title_sub,
+    oneLiner: s.data.one_liner ?? '',
+    tags: [s.data.tag, ...(s.data.tech ?? []).slice(0, 1), s.data.industry ?? ''],
+    cover: s.data.cover?.file ?? '',
+    alt: s.data.cover?.alt ?? '',
+    industry: s.data.industry ?? '',
+    tech: s.data.tech ?? [],
+    motion: s.data.preview_motion ?? null,
+    fit: s.data.cover?.fit ?? 'cover',
+    weight: s.data.sort_weight ?? 9999,
+  })),
+].sort((a, b) => a.weight - b.weight);
+
+const techUsed = taxonomy.techTags.filter((t) => entries.some((e) => e.tech.includes(t)));
+---
+<Base title="项目与案例展厅">
+  <main class="wrap">
+    <section class="hero">
+      <h1>用代码，创造画面</h1>
+      <p>{projects.length} 个代码视频项目、{cases.length} 个单文件网页案例、{works.length} 个 AI 创作作品与 {studies.length} 篇带成本口径的案例精读。按行业浏览，用技术栈筛选，再回到原始来源。</p>
+    </section>
+
+    <section class="toolbar">
+      <input id="q" class="search" type="search" placeholder="搜索名称、介绍、行业或技术栈" aria-label="搜索项目与案例" />
+      <span class="count" id="count">共 {entries.length} 个条目</span>
+      <div class="filter-row">
+        <span class="filter-label">行业</span>
+        <div class="chips" id="ind-chips" role="group" aria-label="行业分类">
+          <button class="chip" type="button" data-ind="全部" aria-pressed="true">全部</button>
+          {taxonomy.industries.map((c) => (
+            <button class="chip" type="button" data-ind={c.label} title={c.desc} aria-pressed="false">{c.label}</button>
+          ))}
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">类型</span>
+        <div class="chips" id="kind-chips" role="group" aria-label="条目类型">
+          <button class="chip" type="button" data-kind="all" aria-pressed="true">全部</button>
+          <button class="chip" type="button" data-kind="project" aria-pressed="false">项目</button>
+          <button class="chip" type="button" data-kind="case" aria-pressed="false">网页案例</button>
+          <button class="chip" type="button" data-kind="work" aria-pressed="false">创作作品</button>
+          <button class="chip" type="button" data-kind="study" aria-pressed="false">精读</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">技术栈</span>
+        <div class="chips" id="tech-chips" role="group" aria-label="技术栈">
+          <button class="chip" type="button" data-tech="全部" aria-pressed="true">全部</button>
+          {techUsed.map((t) => (
+            <button class="chip" type="button" data-tech={t} aria-pressed="false">{t}</button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" id="grid">
+      {entries.map((e) => (
+        <EntryCard href={e.href} title={e.title} subtitle={e.subtitle} oneLiner={e.oneLiner} tags={e.tags} cover={e.cover} alt={e.alt} kind={e.kind} industry={e.industry} tech={e.tech} motion={e.motion} fit={e.fit} />
+      ))}
+    </section>
+    <div class="empty" id="empty">当前行业、技术栈或搜索词下暂无条目。</div>
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  var input = document.getElementById('q');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.entry-card'));
+  var indChips = Array.prototype.slice.call(document.querySelectorAll('#ind-chips .chip'));
+  var techChips = Array.prototype.slice.call(document.querySelectorAll('#tech-chips .chip'));
+  var kindChips = Array.prototype.slice.call(document.querySelectorAll('#kind-chips .chip'));
+  var empty = document.getElementById('empty');
+  var count = document.getElementById('count');
+  var params = new URLSearchParams(location.search);
+  var q = params.get('q') || '';
+  var ind = params.get('ind') || '全部';
+  var tech = params.get('tech') || '全部';
+  var kind = params.get('kind') || 'all';
+  if (input) input.value = q;
+
+  function mark(chips, attr, value) {
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset[attr] === value)); });
+  }
+  mark(indChips, 'ind', ind);
+  mark(techChips, 'tech', tech);
+  mark(kindChips, 'kind', kind);
+
+  function apply() {
+    var n = 0;
+    cards.forEach(function (card) {
+      var okInd = ind === '全部' || card.dataset.industry === ind;
+      var okTech = tech === '全部' || (card.dataset.tech || '').split('|').indexOf(tech) >= 0;
+      var okKind = kind === 'all' || card.dataset.kind === kind;
+      var okQ = !q || (card.dataset.search || '').indexOf(q.toLowerCase()) >= 0;
+      var show = okInd && okTech && okKind && okQ;
+      card.style.display = show ? '' : 'none';
+      if (show) n++;
+    });
+    if (empty) empty.style.display = n === 0 ? 'block' : 'none';
+    if (count) count.textContent = '共 ' + n + ' 个条目';
+  }
+  function sync() {
+    var u = new URL(location.href);
+    if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
+    if (ind !== '全部') u.searchParams.set('ind', ind); else u.searchParams.delete('ind');
+    if (tech !== '全部') u.searchParams.set('tech', tech); else u.searchParams.delete('tech');
+    if (kind !== 'all') u.searchParams.set('kind', kind); else u.searchParams.delete('kind');
+    history.replaceState(null, '', u);
+  }
+  if (input) input.addEventListener('input', function () { q = input.value.trim(); sync(); apply(); });
+  indChips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      ind = c.dataset.ind; mark(indChips, 'ind', ind); sync(); apply();
+    });
+  });
+  techChips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      tech = c.dataset.tech; mark(techChips, 'tech', tech); sync(); apply();
+    });
+  });
+  kindChips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      kind = c.dataset.kind; mark(kindChips, 'kind', kind); sync(); apply();
+    });
+  });
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      try { sessionStorage.setItem('c2v_list_state', JSON.stringify({ q: q, ind: ind, tech: tech, kind: kind, y: window.scrollY })); } catch (e) {}
+    });
+  });
+  if (window.matchMedia('(hover: hover)').matches) {
+    cards.forEach(function (card) {
+      var v = card.querySelector('.card-video');
+      if (!v) return;
+      card.addEventListener('mouseenter', function () { v.play().catch(function () {}); });
+      card.addEventListener('mouseleave', function () { v.pause(); try { v.currentTime = 0; } catch (e) {} });
+    });
+  }
+  document.querySelectorAll('.media-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      img.style.display = 'none';
+      var f = img.parentElement.querySelector('.card-fallback');
+      if (f) f.style.display = 'flex';
+    });
+  });
+  try {
+    if (sessionStorage.getItem('c2v_return') === '1') {
+      sessionStorage.removeItem('c2v_return');
+      var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+      if (typeof s.y === 'number') requestAnimationFrame(function () { window.scrollTo(0, s.y); });
+    }
+  } catch (e) {}
+  apply();
+})();
+</script>

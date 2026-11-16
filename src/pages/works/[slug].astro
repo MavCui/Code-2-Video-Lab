@@ -1,0 +1,183 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const all = await getCollection('works');
+  return all
+    .filter((w) => w.data.status === 'published')
+    .map((w) => ({ params: { slug: w.data.slug }, props: { entry: w } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const all = await getCollection('works');
+const nameBySlug = Object.fromEntries(
+  all.filter((w) => w.data.status === 'published').map((w) => [w.data.slug, w.data.title_zh])
+);
+---
+<Base title={d.title_zh} description={d.one_liner}>
+  <main class="wrap detail">
+    <a class="back" id="back-link" href="/">← 返回项目展厅</a>
+
+    <section class="detail-head">
+      <div class="case-num">作品 {d.num} / 13 · 来自 {d.source?.doc_name}</div>
+      <h1>{d.title_zh}</h1>
+      <p class="sub">{d.author}</p>
+      <p class="one">{d.one_liner}</p>
+      <div class="tag-rows">
+        <div class="tag-row">
+          <span class="label">行业</span>
+          <span class="card-tags"><span class="tag accent">{d.industry}</span></span>
+        </div>
+        <div class="tag-row">
+          <span class="label">技术栈</span>
+          <span class="card-tags">{(d.tech ?? []).map((t) => <span class="tag">{t}</span>)}</span>
+        </div>
+        <div class="tag-row">
+          <span class="label">内容类型</span>
+          <span class="card-tags"><span class="tag">AI 创作案例</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="media-main">
+      {d.preview_motion ? (
+        <video
+          class="detail-media-video"
+          src={d.preview_motion}
+          poster={d.cover?.file}
+          autoplay muted loop playsinline preload="metadata"
+          aria-label={`${d.title_zh} 动态预览`}
+        ></video>
+      ) : (
+        <img class="detail-media-img" src={d.cover?.file} alt={d.cover?.alt ?? ''} />
+      )}
+      <div class="media-caption">
+        <strong>{d.title_zh}</strong> · {d.preview_motion ? '原帖视频片段（5 秒静音循环）' : d.media_records?.[0]?.kind} · {d.author} 原帖素材，非本站复现
+      </div>
+    </section>
+
+    <nav class="outlinks" aria-label="外部来源">
+      <a class="outlink primary" href={d.source?.post} target="_blank" rel="noopener noreferrer">X 原帖 ↗</a>
+      <a class="outlink" href={d.source?.doc} target="_blank" rel="noopener noreferrer">合集文档 ↗</a>
+    </nav>
+
+    <section class="section">
+      <h2>案例说明</h2>
+      <p>{d.summary}</p>
+    </section>
+
+    {(d.details ?? []).length > 0 && (
+      <section class="section">
+        <h2>制作细节</h2>
+        <div class="facts">
+          {(d.details ?? []).map((x) => (
+            <div class="fact"><span class="k">{x.k}</span><span class="v">{x.v}</span></div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="section">
+      <h2>看点</h2>
+      <ul>{(d.highlights ?? []).map((h) => <li>{h}</li>)}</ul>
+    </section>
+
+    {(d.comparison ?? []).length > 0 && (
+      <section class="section">
+        <h2>对比 Demo</h2>
+        <ul>
+          {(d.comparison ?? []).map((c) => (
+            <li><a href={c.url} target="_blank" rel="noopener noreferrer">{c.label} ↗</a>{c.note && <> — {c.note}</>}</li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="section">
+      <h2>证据与边界</h2>
+      <p>{d.evidence_note}</p>
+    </section>
+
+    <section class="section">
+      <h2>使用边界</h2>
+      <ul>
+        <li>展示的是原作者在 X 公开发布的画面（视频抽帧或原图）；本站未独立复现，也不提供实测结论。</li>
+        <li>合集文档中的耗时、成本、对象数量等数字，除特别说明外均为发布者自述。</li>
+        <li>作品版权归原作者；本地截图副本仅供展示台引用，公开托管或商用前需单独确认。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>媒体与许可登记</h2>
+      <p style="font-size:13px;color:var(--muted)">作品许可与预览媒体使用依据分开登记；后者不由前者推导。</p>
+      <div class="scroll">
+        <table class="registry">
+          <thead><tr class="group"><th colspan="2">作品 / 代码许可（作者保留权利）</th></tr></thead>
+          <tbody>
+            <tr><th>SPDX</th><td>{d.license?.spdx}</td></tr>
+            <tr><th>许可 / 说明来源</th><td><a href={d.license?.source} target="_blank" rel="noopener noreferrer">{d.license?.source}</a></td></tr>
+            <tr><th>覆盖说明</th><td>{d.license?.note}</td></tr>
+          </tbody>
+          <thead><tr class="group"><th colspan="2">预览媒体使用依据（逐条单独登记）</th></tr></thead>
+          <tbody>
+            {(d.media_records ?? []).map((m) => (
+              <>
+                <tr><th>素材</th><td><strong>{m.sample_name}</strong> · {m.kind} · <a href={m.file} target="_blank" rel="noopener noreferrer">{m.file}</a></td></tr>
+                <tr><th>权利方 / 署名</th><td>{m.rights_holder} · {m.attribution}</td></tr>
+                <tr><th>使用依据</th><td>{m.usage_basis}</td></tr>
+                <tr><th>来源</th><td><a href={m.source_url} target="_blank" rel="noopener noreferrer">{m.source_url}</a></td></tr>
+                <tr><th>备注</th><td>{m.permission_note ?? '—'}</td></tr>
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>来源与更新时间</h2>
+      <div class="facts">
+        <div class="fact"><span class="k">作者</span><span class="v">{d.author}</span></div>
+        <div class="fact"><span class="k">合集文档</span><span class="v">{d.source?.doc_name} · {d.source?.doc_section}</span></div>
+        <div class="fact"><span class="k">本站更新日期</span><span class="v">{d.updated_at}</span></div>
+        <div class="fact"><span class="k">来源核验说明</span><span class="v">{d.verification_note}</span></div>
+        <div class="fact"><span class="k">原始来源</span><span class="v">作者 X 原帖（上方链接）</span></div>
+      </div>
+    </section>
+
+    {(d.related ?? []).length > 0 && (
+      <section class="section">
+        <h2>相关作品</h2>
+        <div class="related">{(d.related ?? []).map((r) => <a href={`/works/${r}/`}>{nameBySlug[r] ?? r} ↗</a>)}</div>
+      </section>
+    )}
+  </main>
+</Base>
+
+<script is:inline>
+(function () {
+  try {
+    var s = JSON.parse(sessionStorage.getItem('c2v_list_state') || '{}');
+    var back = document.getElementById('back-link');
+    if (back) {
+      var u = new URL('/', location.origin);
+      if (s.q) u.searchParams.set('q', s.q);
+      if (s.ind && s.ind !== '全部') u.searchParams.set('ind', s.ind);
+      if (s.tech && s.tech !== '全部') u.searchParams.set('tech', s.tech);
+      if (s.kind && s.kind !== 'all') u.searchParams.set('kind', s.kind);
+      back.setAttribute('href', u.pathname + u.search);
+      back.addEventListener('click', function () { sessionStorage.setItem('c2v_return', '1'); });
+    }
+  } catch (e) {}
+  document.querySelectorAll('.detail-media-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      var cap = document.createElement('div');
+      cap.className = 'media-caption';
+      cap.textContent = '预览加载失败，请通过上方 X 原帖链接访问原始画面。';
+      img.replaceWith(cap);
+    });
+  });
+})();
+</script>

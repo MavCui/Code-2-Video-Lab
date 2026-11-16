@@ -1,0 +1,58 @@
+﻿类别,项目,入口,能力,证据等级,边界与备注,核验日期
+渲染,HyperFrames,https://github.com/heygen-com/hyperframes,HTML/CSS/seekable 动画；CLI、Studio、Skills、Lambda,A 原始README已读取，未运行,Apache-2.0；引擎开放不等于生成模型免费,2026-11-09
+渲染,OpenFilm,https://github.com/openfilm/openfilm,film.html + frame(t)；本地编辑器与导出,A 原始README已读取，未运行,MIT；同一 t 必须与调用顺序无关,2026-11-09
+渲染,fframes,https://github.com/dmtrKovalenko/fframes,Rust SVG GPU；原生预览,A 原始README已读取，未运行,MIT 主项目；编码器依赖另核；性能为作者基准,2026-11-09
+渲染,ManimGX,https://github.com/academa-labs/manimgx,Manim CE 风格 Python API；Rust/wgpu/WebGPU,A 原始README已读取，未运行,自有代码 MIT；原生 wheels 整体 GPL-3.0-or-later；非完整兼容保证,2026-11-09
+生产编排,OpenMontage,https://github.com/OpenMontageInc/OpenMontage,多生产管线、审批、预算、checkpoint、素材与渲染,A 原始README已读取，未运行,AGPLv3；包含生成模型与实拍路线，非全片纯代码,2026-11-09
+产品片,video-shotcraft,https://github.com/Vincentwei1021/video-shotcraft,真实页面、镜头配方、Remotion、节拍、Workbench、剪映导出,A 原始README已读取，未运行,10月更新为124卡/150镜头；Apache-2.0，不覆盖依赖与素材,2026-11-09
+讲解片,video-talkcraft,https://github.com/Vincentwei1021/video-talkcraft,成品旁白对齐、语义拍分镜、Remotion、分段重渲,A 原始README已读取，未运行,PolyForm Noncommercial；README正文108卡而简介109，数字待统一,2026-11-09
+产品片,brag,https://github.com/latent-spaces/brag,repo/site → 产品叙事、发布片、分享文案,A 原始README已读取，未运行,经典版 HyperFrames；slim 不依赖 HyperFrames,2026-11-09
+产品片,归藏 product video skill,https://github.com/op7418/guizang-product-video-skill,真实组件接入、版本更新、GSAP、程序化配乐,A 原始README已读取，未运行,主许可 AGPL；fallback CodePilot 组件 BSL；不是仅 HyperFrames 包装,2026-11-09
+实拍编辑,video-use,https://github.com/browser-use/video-use,转写→EDL→FFmpeg→切点自检；可加代码覆盖层,A 原始README已读取，未运行,当前默认接入 ElevenLabs；开源工具不等于全流程无付费依赖,2026-11-09
+风格与作品,Lemo Opuscar,https://github.com/lemomo-ai/lemo-opuscar,66风格、导演指南、源码样片；证据型影片与纪录片,A 原始README已读取，未运行,10-29新增7风格；代码MIT、样片CC BY4.0，6条旁白除外,2026-11-09
+渲染,Remotion,https://github.com/remotion-dev/remotion,React按帧视频、Studio、Player、云渲染,B 原始入口/索引交叉,Source-available专用许可，须另核商业条件,2026-11-09
+渲染,Motion Canvas,https://motioncanvas.io/,TypeScript generator解释动画,B 官方页面,非扩散模型 MotionCanvas,2026-11-09
+教育Agent,Code2Video,https://showlab.github.io/Code2Video/,Planner/Coder/Critic + Manim,B 前轮原始项目页,不同于SenseNova同名模型,2026-11-09
+教育Agent,TheoremExplainAgent,https://github.com/TIGER-AI-Lab/TheoremExplainAgent,长篇定理解释视频,B 项目页与官方仓库检索,需独立核验当前环境,2026-11-09
+教育Agent,Manimator,https://github.com/HyperCluster-Tech/manimator,论文→场景计划→Manim,B 论文与官方仓库检索,不要与nabin2004同名实现混算,2026-11-09
+教育Agent,Math-To-Manim,https://github.com/HarleyCoops/Math-To-Manim,数学物理动画与制作工程,B 前轮读取README,工程能力与作者定性声明分开,2026-11-09
+教育Agent,Manimator轻量实现,https://github.com/nabin2004/Manimator,LangGraph文本到数学动画,B 仓库检索,独立于论文Manimator,2026-11-09
+教育Agent,paper-to-animation,https://github.com/ayushnangia/paper-to-animation,六阶段论文到动画流程,B 仓库检索,工程模板路线,2026-11-09
+专用模型,SenseNova Code2Video,https://github.com/OpenSenseNova/SenseNova-6.8-Code2Video,开放权重模型、code-video Skill、轨迹,B 前轮读取官方README,未建立本轮独立性能排名,2026-11-09
+物理视频,MoReGen,https://github.com/ostadabbas/MoReGen-Multi-Agent-Motion-Reasoning-Engine,自然语言→物理仿真代码→渲染,B 论文与官方仓库检索,物理正确性仍依赖模型与仿真假设,2026-11-09
+地图,MapStory,https://adigunturu.github.io/MapStory/,地理研究与分镜双Agent、可编辑地图动画,B ACM/大学项目说明,不是Map2Video街景生成,2026-11-09
+商业产品,Kino AI,https://news.ycombinator.com/item?id=50368804,媒体管理/编辑；作者称以Remotion代码表达编辑和3D,C 2026-11-04社区作者声明,未读产品技术文档,2026-11-09
+商业产品,X-Pilot,https://news.ycombinator.com/item?id=46705382,Text/PDF/Doc→Remotion与可编辑层→课程视频,C 社区作者声明,非独立效果验证,2026-11-09
+商业产品,Framecall,https://news.ycombinator.com/item?id=46855698,托管提示词到动效视频,C 社区作者声明,用于产品形态参考,2026-11-09
+社区案例,PatchPlay,https://www.reddit.com/r/reactjs/comments/1sd59kn/built_a_react_app_that_generates_videos_from/,GitHub PR diff→浏览器动画视频,C 作者社区案例,商业成效未核,2026-11-09
+社区案例,Cling发布片,https://news.ycombinator.com/item?id=50112739,源码+截图+交互权限→HyperFrames产品视频,C 作者经验,非通用benchmark,2026-11-09
+生产工具,digitalsamba/claude-code-video-toolkit,https://github.com/digitalsamba/claude-code-video-toolkit,视频、录屏、语音、素材混合工具链,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+风格与作品,JohnHeibel/PDoomVideo,https://github.com/JohnHeibel/PDoomVideo,p5.js+p5.brush音乐视频源码,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+风格与作品,JohnHeibel/ClaudeAnimationBase,https://github.com/JohnHeibel/ClaudeAnimationBase,手绘角色、情绪表演与动画指南,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+风格与作品,ledbetterljoshua/functional-emotions-video,https://github.com/ledbetterljoshua/functional-emotions-video,GPU笔触与并行章节音乐视频,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,feitangyuan/onetake,https://github.com/feitangyuan/onetake,连续相机、一镜到底、连续性检查,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,echris6/motion-video-kit,https://github.com/echris6/motion-video-kit,商业视频、独立critic与声音设计,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,Tejashmakwana/motionmaxxing,https://github.com/Tejashmakwana/motionmaxxing,动效设计质量与风格纠正,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+讲解片,vincentsch/explainroo,https://github.com/vincentsch/explainroo,本地Kokoro+Whisper+Canvas,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+讲解片,haiderfarooq3/khan-explainer,https://github.com/haiderfarooq3/khan-explainer,笔绘白板、声音同步、本地路线,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+讲解片,shuyicc/MathLens,https://github.com/shuyicc/MathLens,数学题图文→Manim解题讲解,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+讲解片,Alisa0808/vox-director,https://github.com/Alisa0808/vox-director,纸拼贴解释视频，混合生成素材,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+讲解片,hi-nikola/hand-drawn-explainer-video-nikola,https://github.com/hi-nikola/hand-drawn-explainer-video-nikola,中文手绘、逐笔叙事,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+生产工具,iart-ai/motion-skills,https://github.com/iart-ai/motion-skills,多类型动效技能,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+生产工具,iart-ai/data-animation-skills,https://github.com/iart-ai/data-animation-skills,CSV→动态图表技能,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,iart-ai/ad-video-skills,https://github.com/iart-ai/ad-video-skills,参数化模板与广告变体,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,Avijit07x/cursorcam,https://github.com/Avijit07x/cursorcam,真实点击与自动放大演示,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,gmpetrov/agent-screenplay,https://github.com/gmpetrov/agent-screenplay,Agent驱动屏幕录制,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+产品片,trunghaiy/appshot,https://github.com/trunghaiy/appshot,应用商店预览视频与截图,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+测试与开发者内容,wzslr321/fixtape,https://github.com/wzslr321/fixtape,bug与修复前后对照视频,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+工作台,ZLHad/OpenVideoHarness,https://github.com/ZLHad/OpenVideoHarness,代码、分镜、抽帧、Agent审片工作台,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+渲染,vawe-hq/vawe,https://github.com/vawe-hq/vawe,HTML到MP4轻量框架,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+渲染,0xS4N4TG/kinetograph,https://github.com/0xS4N4TG/kinetograph,面向Agent的程序化视频引擎,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+渲染,oxygenframe/oxframe-sdk,https://github.com/oxygenframe/oxframe-sdk,Rust场景、storyboard与定位报告,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+渲染,smwbev/framewright,https://github.com/smwbev/framewright,frame/seed/width纯函数视频模板,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+广告,Finderchangchang/promo-video-skill,https://github.com/Finderchangchang/promo-video-skill,竖版广告、行业配方与合规检查声明,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+专业场景,actionow-ai/vvv,https://github.com/actionow-ai/vvv,可编辑婚礼视频模板,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+游戏,hildlabs/openrig-studio,https://github.com/hildlabs/openrig-studio,Roblox R15角色动画,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+角色动画,squall01337/mixamo-llm-mocap,https://github.com/squall01337/mixamo-llm-mocap,视频动作估计、重定向、Blender,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+混合管线,hypit-ai/hypit,https://github.com/hypit-ai/hypit,参考短视频、口播、B-roll、多变体,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09
+生产工具,leodavincs/kalem,https://github.com/leodavincs/kalem,按场景选择不同引擎,D 专题索引候选，未读独立仓库,发现源：https://github.com/zhuyansen/awesome-claude-video-skills；安全评级未独立审计,2026-11-09

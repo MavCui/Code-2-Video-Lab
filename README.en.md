@@ -1,3 +1,5 @@
+![Code 2 Video Lab](docs/images/readme-cover.png)
+
 # Code-2-Video-Lab
 
 > A developer-facing showcase for code-generated visuals: 177 entries, 243 real preview assets, every one traceable to its source — plus a standalone selection report HTML.

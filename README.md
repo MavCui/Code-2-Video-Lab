@@ -1,3 +1,5 @@
+![Code 2 Video Lab](docs/images/readme-cover.png)
+
 # Code-2-Video-Lab
 
 > 一个关于「代码生成画面」的开发展厅：177 个条目、243 个真实预览素材，都能回到原始来源；另附一份独立的选型决策报告 HTML。
